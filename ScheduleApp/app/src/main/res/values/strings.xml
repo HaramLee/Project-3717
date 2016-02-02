@@ -1,4 +1,9 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Edgy</string>
     <string name="at_a_glance">At a glance</string>
+    <string-array name="studentID">ID List
+        <item>Chau, Dennis A00920445</item>
+        <item>Lee, Ha Ram A00711689</item>
+        <item>Baik, Injo A00912164</item>
+    </string-array>
 </resources>
