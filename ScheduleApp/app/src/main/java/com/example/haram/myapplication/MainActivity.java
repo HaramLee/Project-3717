@@ -2,6 +2,7 @@ package com.example.haram.myapplication;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.CalendarView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -10,4 +11,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
+
+    public void calendar_init(){
+        CalendarView calendar = (CalendarView) findViewById(R.id.calendar);
+
+//        calendar.setDateTextAppearance();
+    }
+
 }
