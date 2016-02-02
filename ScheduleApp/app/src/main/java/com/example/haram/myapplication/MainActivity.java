@@ -38,18 +38,11 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 1244bdb09701dcd3de2e41788a6f9cef4300d22d
     public void calendar_init(){
         CalendarView calendar = (CalendarView) findViewById(R.id.calendar);
 
-//        calendar.setDateTextAppearance();
+
     }
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 1244bdb09701dcd3de2e41788a6f9cef4300d22d
 }

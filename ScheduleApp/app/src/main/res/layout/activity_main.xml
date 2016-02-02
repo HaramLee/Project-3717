@@ -14,14 +14,12 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:id="@+id/linearLayout">
-        <CalendarView
+        <com.imanoweb.calendarview.CustomCalendarView
+            android:id="@+id/calendar"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="5"
-            android:clickable="true"
-            android:id="@+id/calendar">
+            android:layout_height="wrap_content"
+            android:background="#ffffff" />
 
-        </CalendarView>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,8 +37,5 @@
 
 
     </LinearLayout>
-
-
-
 
 </RelativeLayout>
