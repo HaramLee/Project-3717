@@ -27,14 +27,27 @@ public class setting_display extends AppCompatActivity {
         background = (RelativeLayout) findViewById(R.id.backgroundLayout);
 
         Switch switch1 = (Switch) findViewById(R.id.switch1);
+        Switch sw_switch = (Switch) findViewById(R.id.sw_service);
+
         switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) {
+                if (isChecked) {
                     background.setBackgroundColor(Color.BLUE);
                 } else {
                     background.setBackgroundColor(Color.WHITE);
+                }
+            }
+        });
+
+        sw_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    startService(new Intent(getBaseContext(), HotSpotService.class));
+                } else {
+                    stopService(new Intent(getBaseContext(), HotSpotService.class));
                 }
             }
         });

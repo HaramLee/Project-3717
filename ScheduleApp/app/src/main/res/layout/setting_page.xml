@@ -25,8 +25,8 @@
     <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Setting 2"
-        android:id="@+id/switch2"
+        android:text="Service"
+        android:id="@+id/sw_service"
         android:textSize="35dp"
         android:layout_marginTop="33dp"
         android:checked="false"
@@ -40,7 +40,7 @@
         android:id="@+id/switch3"
         android:textSize="35dp"
         android:checked="false"
-        android:layout_below="@+id/switch2"
-        android:layout_alignStart="@+id/switch2"
+        android:layout_below="@+id/sw_service"
+        android:layout_alignStart="@+id/sw_service"
         android:layout_marginTop="33dp" />
 </RelativeLayout>
