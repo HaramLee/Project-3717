@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">Edgy</string>
     <string name="at_a_glance">At a glance</string>
+    <string name="enter_name_text_view">Enter Name:</string>
+    <string name="enter_name_button_text">Enter</string>
+    <string name="calling_acitivity_message">The calling activity was</string>
+    <string name="get_the_name_text_view">Go Get the Name</string>
+    <string name="users_name_sent_back">The Users name was</string>
     <string-array name="studentID">ID List
         <item>Chau, Dennis A00920445</item>
         <item>Lee, Ha Ram A00711689</item>
