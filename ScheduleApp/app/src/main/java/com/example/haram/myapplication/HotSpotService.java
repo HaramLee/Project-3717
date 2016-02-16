@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +51,9 @@ public class HotSpotService extends Service {
         textView.setBackgroundResource(R.color.red);
 
         final Button button = new Button(this);
+        final ImageView img = new ImageView(this);
+        img.setImageResource(R.drawable.al);
+
 
         final WindowManager.LayoutParams layoutParams3 = new WindowManager.LayoutParams();
         layoutParams3.height = WindowManager.LayoutParams.MATCH_PARENT;
@@ -64,11 +68,12 @@ public class HotSpotService extends Service {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         textView.setBackgroundResource(R.color.white);
-                        windowManager2.addView(button, layoutParams3);
+                        windowManager2.addView(img, layoutParams3);
+
                         break;
                     case MotionEvent.ACTION_UP:
                         textView.setBackgroundResource(R.color.red);
-                        windowManager2.removeView(button);
+                        windowManager2.removeView(img);
                         break;
 
                 }
