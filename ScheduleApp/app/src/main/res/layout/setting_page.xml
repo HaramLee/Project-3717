@@ -1,35 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="20dp"
-    android:gravity="center|top"
-    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="0dp"
+    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.haram.myapplication.MainActivity"
     android:id="@+id/backgroundLayout">
 
-    <TextView
+    <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/get_the_name_text_view"
-        android:textStyle="bold"
-        android:textSize="20sp"/>
+        android:text="Setting 1"
+        android:id="@+id/switch1"
+        android:layout_marginTop="34dp"
+        android:textSize="35dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="34dp"
+        android:checked="false" />
 
-    <Button
+    <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Go Get It"
-        android:layout_marginTop="20dp"
-        android:onClick="onGetNameClick"/>
+        android:text="Service"
+        android:id="@+id/sw_service"
+        android:textSize="35dp"
+        android:layout_marginTop="33dp"
+        android:checked="false"
+        android:layout_below="@+id/switch1"
+        android:layout_alignStart="@+id/switch1" />
 
-    <TextView
+    <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/users_name_sent_back"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp"
-        android:id="@+id/users_name_message"/>
-
-</LinearLayout>
+        android:text="Setting 3"
+        android:id="@+id/switch3"
+        android:textSize="35dp"
+        android:checked="false"
+        android:layout_below="@+id/sw_service"
+        android:layout_alignStart="@+id/sw_service"
+        android:layout_marginTop="33dp" />
+</RelativeLayout>
