@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -40,6 +41,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    ViewPager viewpager;
+    FragmentPageAdapter ft;
     GoogleAccountCredential mCredential;
     private TextView mOutputText;
 //    ProgressDialog mProgress;
@@ -58,6 +61,11 @@ public class MainActivity extends AppCompatActivity {
 //        mProgress.setMessage("Calling Google Calendar API ...");
 
         setContentView(R.layout.activity_main);
+
+        viewpager = (ViewPager) findViewById(R.id.pager);
+        ft = new FragmentPageAdapter(getSupportFragmentManager());
+
+        viewpager.setAdapter(ft);
 
         mOutputText = (TextView) findViewById(R.id.glance);
 
