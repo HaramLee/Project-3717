@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     ViewPager viewpager;
     FragmentPageAdapter ft;
     GoogleAccountCredential mCredential;
-    private TextView mOutputText;
+    public static TextView mOutputText;
 //    ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;

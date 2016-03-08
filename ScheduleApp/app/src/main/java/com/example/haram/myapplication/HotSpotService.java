@@ -1,30 +1,39 @@
 package com.example.haram.myapplication;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.imanoweb.calendarview.CustomCalendarView;
 //import com.example.haram.myapplication.EdgeDetector;
 
 public class HotSpotService extends Service {
 //    EdgeDetector edgeDetector;
     RelativeLayout rl;
+    RelativeLayout rl2;
     WindowManager windowManager;
     WindowManager windowManager2;
     static int height;
     static int width;
     static TextView textView;
+    static TextView taskList;
+    static TextView newList;
 
     public IBinder onBind(Intent intent) {
         return null;
@@ -42,6 +51,7 @@ public class HotSpotService extends Service {
         height = displayMetrics.heightPixels;
         width = displayMetrics.widthPixels;
         rl = new RelativeLayout(this);
+        rl2 = new RelativeLayout(this);
         textView = new TextView(this);
 
         textView.setSingleLine();
@@ -52,7 +62,30 @@ public class HotSpotService extends Service {
 
         final Button button = new Button(this);
         final ImageView img = new ImageView(this);
+        final CustomCalendarView calendar = new CustomCalendarView(this);
+        calendar.setId(100000);
         img.setImageResource(R.drawable.al);
+
+        LayoutInflater factory = (LayoutInflater) this.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+
+        final View textEntryView = factory.inflate(R.layout.activity_main, null);
+
+        taskList = (TextView) textEntryView.findViewById(R.id.glance);
+        newList = new TextView(this);
+        newList.setText(MainActivity.mOutputText.getText());
+        newList.setBackgroundColor(getResources().getColor(R.color.white));
+        newList.setTextColor(getResources().getColor(R.color.black));
+
+        RelativeLayout.LayoutParams layoutParams_calendar =
+                new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams_calendar.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+
+        RelativeLayout.LayoutParams layoutParams_text =
+                new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams_text.addRule(RelativeLayout.BELOW, calendar.getId());
+
+        rl2.addView(calendar, layoutParams_calendar);
+        rl2.addView(newList, layoutParams_text);
 
 
         final WindowManager.LayoutParams layoutParams3 = new WindowManager.LayoutParams();
@@ -60,7 +93,7 @@ public class HotSpotService extends Service {
         layoutParams3.width = WindowManager.LayoutParams.MATCH_PARENT;
         layoutParams3.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
         layoutParams3.flags = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        layoutParams3.format = PixelFormat.TRANSPARENT;
+        layoutParams3.format = PixelFormat.TRANSLUCENT;
 
         textView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -68,14 +101,13 @@ public class HotSpotService extends Service {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         textView.setBackgroundResource(R.color.white);
-                        windowManager2.addView(img, layoutParams3);
-
+                        windowManager2.addView(rl2, layoutParams3);
                         break;
+
                     case MotionEvent.ACTION_UP:
                         textView.setBackgroundResource(R.color.red);
-                        windowManager2.removeView(img);
+                        windowManager2.removeView(rl2);
                         break;
-
                 }
                 return true;
             }
@@ -110,7 +142,7 @@ public class HotSpotService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Let it continue running until it is stopped.
-        Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
         return START_STICKY;
     }
 }
