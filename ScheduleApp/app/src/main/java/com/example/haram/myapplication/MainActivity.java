@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
                 connectionStatusCode,
                 MainActivity.this,
                 REQUEST_GOOGLE_PLAY_SERVICES);
-        dialog.show();
+//        dialog.show();
     }
     /**
      * An asynchronous task that handles the Google Calendar API call.
