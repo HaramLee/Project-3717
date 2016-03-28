@@ -20,7 +20,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.imanoweb.calendarview.CustomCalendarView;
+//import com.imanoweb.calendarview.CustomCalendarView;
 //import com.example.haram.myapplication.EdgeDetector;
 
 public class HotSpotService extends Service {
@@ -62,8 +62,8 @@ public class HotSpotService extends Service {
 
         final Button button = new Button(this);
         final ImageView img = new ImageView(this);
-        final CustomCalendarView calendar = new CustomCalendarView(this);
-        calendar.setId(100000);
+//        final CustomCalendarView calendar = new CustomCalendarView(this);
+//        calendar.setId(100000);
         img.setImageResource(R.drawable.al);
 
         LayoutInflater factory = (LayoutInflater) this.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
@@ -74,7 +74,7 @@ public class HotSpotService extends Service {
         newList = new TextView(this);
         newList.setText(MainActivity.mOutputText.getText());
         newList.setBackgroundColor(getResources().getColor(R.color.white));
-        newList.setTextColor(getResources().getColor(R.color.black));
+//        newList.setTextColor(getResources().getColor(R.color.black));
 
         RelativeLayout.LayoutParams layoutParams_calendar =
                 new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -82,9 +82,9 @@ public class HotSpotService extends Service {
 
         RelativeLayout.LayoutParams layoutParams_text =
                 new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams_text.addRule(RelativeLayout.BELOW, calendar.getId());
+//        layoutParams_text.addRule(RelativeLayout.BELOW, calendar.getId());
 
-        rl2.addView(calendar, layoutParams_calendar);
+//        rl2.addView(calendar, layoutParams_calendar);
         rl2.addView(newList, layoutParams_text);
 
 
@@ -151,7 +151,7 @@ class Gestures extends GestureDetector.SimpleOnGestureListener {
 
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY){
         if (e1.getX() < HotSpotService.width) {
-            HotSpotService.textView.setBackgroundResource(R.color.black);
+//            HotSpotService.textView.setBackgroundResource(R.color.black);
             return true;
         }
         return false;

@@ -6,17 +6,16 @@
     android:orientation="vertical"
     android:id="@+id/linearLayout"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <com.imanoweb.calendarview.CustomCalendarView
-        android:id="@+id/calendar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffffff" />
+    <!--<com.imanoweb.calendarview.CustomCalendarView-->
+        <!--android:id="@+id/calendar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:background="#ffffff" />-->
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/at_a_glance"
-        android:layout_below="@id/calendar"
+        android:layout_below="@id/calendar1"
         android:id="@+id/glance"/>
 
 

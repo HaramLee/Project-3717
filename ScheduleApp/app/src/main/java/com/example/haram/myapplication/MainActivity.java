@@ -6,18 +6,23 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.CalendarView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -37,7 +42,13 @@ import com.google.api.services.calendar.model.Events;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
+import com.example.haram.myapplication.CaldroidCustomFragment;
+import com.roomorama.caldroid.CaldroidFragment;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
 
+    private CaldroidFragment caldroidFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,14 +75,36 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        viewpager = (ViewPager) findViewById(R.id.pager);
-        ft = new FragmentPageAdapter(getSupportFragmentManager());
+//        viewpager = (ViewPager) findViewById(R.id.pager);
+//        ft = new FragmentPageAdapter(getSupportFragmentManager());
 
-        viewpager.setAdapter(ft);
+//        viewpager.setAdapter(ft);
+
+        mOutputText = (TextView) findViewById(R.id.glance);
+
+        // Initialize credentials and service object.
+        SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+        mCredential = GoogleAccountCredential.usingOAuth2(
+                getApplicationContext(), Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff())
+                .setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
+
+        caldroidFragment = new CaldroidCustomFragment();
+
+        Bundle args = new Bundle();
+        Calendar cal = Calendar.getInstance();
+        args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
+        args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
+        args.putBoolean(CaldroidFragment.ENABLE_SWIPE, true);
+        args.putBoolean(CaldroidFragment.SIX_WEEKS_IN_CALENDAR, true);
+
+        caldroidFragment.setArguments(args);
 
 
+        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+        t.replace(R.id.calendar1, caldroidFragment);
+        t.commit();
     }
-
 
     /**
      * Called whenever this activity is pushed to the foreground, such as after
@@ -83,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             mOutputText.setText("Google Play Services required: " +
                     "after installing, close and relaunch this app.");
+
         }
     }
 
@@ -280,8 +316,11 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 output.add(0, "Data retrieved using the Google Calendar API:");
                 mOutputText.setText(TextUtils.join("\n", output));
+                setCustomResourceForDates();
             }
         }
+
+
 
         @Override
         protected void onCancelled() {
@@ -305,7 +344,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -327,9 +365,46 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void calendar_init(){
-        CalendarView calendar = (CalendarView) findViewById(R.id.calendar);
+//    public void calendar_init(){
+//        CalendarView calendar = (CalendarView) findViewById(R.id.calendar);
+//    }
+
+    private void setCustomResourceForDates() {
+        Calendar cal = Calendar.getInstance();
+
+//        Toast.makeText(MainActivity.this, Integer.toString(Calendar.DATE), Toast.LENGTH_SHORT).show();
+        String result = (String) mOutputText.getText();
+        String target = "03-";
+        ArrayList<Integer> dates = new ArrayList<Integer>();
+        for (int i = -1; (i = result.indexOf(target, i + 1)) != -1; ) {
+            dates.add(i);
+        }
+
+
+        Date blueDate = null;
+        for (Integer date : dates){
+            int event = Integer.parseInt(result.substring(date + 3, date + 5));
+
+            cal.set(Calendar.DATE, event);
+            cal.add(Calendar.DATE, 0);
+
+
+            blueDate = cal.getTime();
+        }
+
+//
+//        cal = Calendar.getInstance();
+//        cal.add(Calendar.DATE, 7);
+//        Date greenDate = cal.getTime();
+
+        if (caldroidFragment != null) {
+            ColorDrawable blue = new ColorDrawable(getResources().getColor(R.color.blue));
+            ColorDrawable green = new ColorDrawable(Color.GREEN);
+            caldroidFragment.setBackgroundDrawableForDate(blue, blueDate);
+//            caldroidFragment.setBackgroundDrawableForDate(green, greenDate);
+            caldroidFragment.setTextColorForDate(R.color.white, blueDate);
+//            caldroidFragment.setTextColorForDate(R.color.white, greenDate);
+            caldroidFragment.refreshView();
+        }
     }
-
-
 }
