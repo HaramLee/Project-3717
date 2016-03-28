@@ -350,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
 
         inflater.inflate(R.menu.main_menu, menu);
+        inflater.inflate(R.menu.add_event, menu);
         return true;
     }
 
@@ -358,6 +359,19 @@ public class MainActivity extends AppCompatActivity {
             case R.id.settings_id:
                 Intent i = new Intent(MainActivity.this, setting_display.class);
                 startActivity(i);
+                break;
+            case R.id.add_id:
+                Calendar cal = Calendar.getInstance();
+                Intent j = new Intent(Intent.ACTION_EDIT);
+                j.setType("vnd.android.cursor.item/event");
+                j.putExtra("BeginTime", cal.getTimeInMillis());
+                j.putExtra("allDay",true);
+                j.putExtra("rrule","FREQ=YEARLY");
+                j.putExtra("EndTime",cal.getTimeInMillis()+60*60*1000);
+                j.putExtra("title","Test Event");
+                j.putExtra("description"," ");
+
+                startActivity(j);
                 break;
             default:
                 break;
