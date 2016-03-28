@@ -23,12 +23,11 @@
             </intent-filter>
         </activity>
 
-
+        <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
+        <uses-permission android:name="android.permission.READ_CALENDAR"/>
         <activity android:name=".setting_display">
         </activity>
-        <activity android:name=".setting_displayTwo"
-            android:label="Get Name"
-            android:theme="@style/AppTheme" />
+
         <service android:name=".HotSpotService" />
 
         <meta-data
