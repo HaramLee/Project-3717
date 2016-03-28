@@ -278,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
          */
         private List<String> getDataFromApi() throws IOException {
             // List the next 10 events from the primary calendar.
-            DateTime now = new DateTime(System.currentTimeMillis());
+            //DateTime now = new DateTime(System.currentTimeMillis());
             List<String> eventStrings = new ArrayList<String>();
             Events events = mService.events().list("g829tv4r8rich02qtgcf2521l8@group.calendar.google.com")
 //                    .setMaxResults(10)
@@ -349,6 +349,7 @@ public class MainActivity extends AppCompatActivity {
 
         MenuInflater inflater = getMenuInflater();
 
+        inflater.inflate(R.menu.refresh_button, menu);
         inflater.inflate(R.menu.main_menu, menu);
         inflater.inflate(R.menu.add_event, menu);
         return true;
@@ -372,6 +373,10 @@ public class MainActivity extends AppCompatActivity {
                 j.putExtra("description"," ");
 
                 startActivity(j);
+                break;
+            case R.id.refresh_id:
+                new MakeRequestTask(mCredential).execute();
+                caldroidFragment.refreshView();
                 break;
             default:
                 break;
