@@ -37,6 +37,9 @@ import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventAttendee;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
@@ -381,30 +384,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        Date blueDate = null;
+//        Date blueDate = null;
         for (Integer date : dates){
             int event = Integer.parseInt(result.substring(date + 3, date + 5));
 
             cal.set(Calendar.DATE, event);
             cal.add(Calendar.DATE, 0);
-
-
-            blueDate = cal.getTime();
+            Date coloredDate = cal.getTime();
+//            blueDate = cal.getTime();
+            if (caldroidFragment != null) {
+                ColorDrawable cell = new ColorDrawable(getResources().getColor(R.color.blue));
+                caldroidFragment.setBackgroundDrawableForDate(cell, coloredDate);
+                caldroidFragment.setTextColorForDate(R.color.white, coloredDate);
+                caldroidFragment.refreshView();
+            }
         }
 
-//
-//        cal = Calendar.getInstance();
-//        cal.add(Calendar.DATE, 7);
-//        Date greenDate = cal.getTime();
-
-        if (caldroidFragment != null) {
-            ColorDrawable blue = new ColorDrawable(getResources().getColor(R.color.blue));
-            ColorDrawable green = new ColorDrawable(Color.GREEN);
-            caldroidFragment.setBackgroundDrawableForDate(blue, blueDate);
-//            caldroidFragment.setBackgroundDrawableForDate(green, greenDate);
-            caldroidFragment.setTextColorForDate(R.color.white, blueDate);
-//            caldroidFragment.setTextColorForDate(R.color.white, greenDate);
-            caldroidFragment.refreshView();
-        }
     }
 }
