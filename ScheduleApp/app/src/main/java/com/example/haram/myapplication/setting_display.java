@@ -1,8 +1,14 @@
 package com.example.haram.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,7 +26,7 @@ import java.util.Calendar;
 /**
  * Created by Haram on 2016-02-01.
  */
-public class setting_display extends AppCompatActivity {
+public class setting_display extends PreferenceActivity {
 
     private LinearLayout background;
 
@@ -29,35 +35,52 @@ public class setting_display extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.setting_page);
+        addPreferencesFromResource(R.layout.setting_page);
 
 //        background = (LinearLayout) findViewById(R.id.backgroundLayout);
 
-        Switch switch1 = (Switch) findViewById(R.id.switch1);
-        Switch sw_switch = (Switch) findViewById(R.id.sw_service);
+//        Switch switch1 = (Switch) findViewById(R.id.switch1);
+        final CheckBoxPreference sw_switch = (CheckBoxPreference)findPreference("sw_switch");
 
-        switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    background.setBackgroundColor(Color.BLUE);
-                } else {
-                    background.setBackgroundColor(Color.WHITE);
-                }
-            }
-        });
-
-        sw_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
+        sw_switch.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                if (sw_switch.isChecked()) {
                     startService(new Intent(getBaseContext(), HotSpotService.class));
+                    return true;
                 } else {
                     stopService(new Intent(getBaseContext(), HotSpotService.class));
+                    return false;
                 }
+
             }
         });
+
+    }
+
+    // String
+    public static String Read(Context context, final String key) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        return pref.getString(key, "");
+    }
+
+    public static void Write(Context context, final String key, final String value) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(key, value);
+        editor.commit();
+    }
+
+    // Boolean
+    public static boolean ReadBoolean(Context context, final String key, final boolean defaultValue) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        return settings.getBoolean(key, defaultValue);
+    }
+
+    public static void WriteBoolean(Context context, final String key, final boolean value) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(key, value);
+        editor.commit();
     }
 
     @Override
