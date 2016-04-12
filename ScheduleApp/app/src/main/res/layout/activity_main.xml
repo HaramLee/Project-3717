@@ -46,13 +46,22 @@
             android:orientation="vertical">
         </LinearLayout>
 
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/list"
+            android:background="@color/caldroid_white">
 
+
+
+        </ListView>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/calendar1"
             android:id="@+id/glance"/>
+
 
 
     </LinearLayout>

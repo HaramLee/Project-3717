@@ -1,8 +1,11 @@
 package com.example.haram.myapplication;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
@@ -12,13 +15,23 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 //import com.imanoweb.calendarview.CustomCalendarView;
 //import com.example.haram.myapplication.EdgeDetector;
@@ -32,8 +45,9 @@ public class HotSpotService extends Service {
     static int height;
     static int width;
     static TextView textView;
-    static TextView taskList;
-    static TextView newList;
+    static ListView taskList;
+    static ListView newList;
+    private IntentFilter receiveFilter;
 
     public IBinder onBind(Intent intent) {
         return null;
@@ -70,10 +84,42 @@ public class HotSpotService extends Service {
 
         final View textEntryView = factory.inflate(R.layout.activity_main, null);
 
-        taskList = (TextView) textEntryView.findViewById(R.id.glance);
-        newList = new TextView(this);
-        newList.setText(MainActivity.mOutputText.getText());
+        String[] summary = MainActivity.summary.toArray(new String[MainActivity.summary.size()]);
+
+//        for (String s : MainActivity.summary){
+//            summary.add( new String(s) );
+//
+//        }
+
+        ArrayList<String> fds = new ArrayList<>();
+        fds.add("fdsa");
+
+        ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
+        ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
+
+
+
+
+        taskList =  (ListView) textEntryView.findViewById(R.id.list);
+        newList = new ListView(this);
+        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, summary){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view =super.getView(position, convertView, parent);
+
+                TextView textView=(TextView) view.findViewById(android.R.id.text1);
+
+            /*YOUR CHOICE OF COLOR*/
+                textView.setTextColor(Color.BLACK);
+
+                return view;
+            }
+        };
+        newList.setAdapter(adapter);
         newList.setBackgroundColor(getResources().getColor(R.color.white));
+
+//        newList.setText(MainActivity.mOutputText.getText());
+//        newList.setBackgroundColor(getResources().getColor(R.color.white));
 //        newList.setTextColor(getResources().getColor(R.color.black));
 
         RelativeLayout.LayoutParams layoutParams_calendar =
@@ -85,7 +131,8 @@ public class HotSpotService extends Service {
 //        layoutParams_text.addRule(RelativeLayout.BELOW, calendar.getId());
 
 //        rl2.addView(calendar, layoutParams_calendar);
-        rl2.addView(newList, layoutParams_text);
+//        rl2.addView(newList, layoutParams_text);
+          rl2.addView(newList, layoutParams_text);
 
 
         final WindowManager.LayoutParams layoutParams3 = new WindowManager.LayoutParams();
@@ -145,6 +192,7 @@ public class HotSpotService extends Service {
 //        Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
         return START_STICKY;
     }
+
 }
 
 class Gestures extends GestureDetector.SimpleOnGestureListener {

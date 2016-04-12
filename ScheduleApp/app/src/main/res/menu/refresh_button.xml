@@ -7,6 +7,7 @@
     <item
         android:id="@+id/refresh_id"
         app:showAsAction="always"
-        android:title="%" />
+        android:fontFamily="Wingdings 3"
+        android:title="ט" />
 
 </menu>

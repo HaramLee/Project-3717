@@ -5,13 +5,16 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,7 +23,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,11 +48,15 @@ import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.example.haram.myapplication.CaldroidCustomFragment;
 import com.roomorama.caldroid.CaldroidFragment;
@@ -66,8 +75,11 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
+    public static ArrayList<String> summary;
 
     private CaldroidFragment caldroidFragment;
+
+    private IntentFilter receiveFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         t.replace(R.id.calendar1, caldroidFragment);
         t.commit();
+
+
     }
 
     /**
@@ -246,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
      * An asynchronous task that handles the Google Calendar API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
      */
-    private class MakeRequestTask extends AsyncTask<Void, Void, List<String>> {
+    private class MakeRequestTask extends AsyncTask<Void, Void, List<Event>> {
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
 
@@ -264,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
          * @param params no parameters needed for this task.
          */
         @Override
-        protected List<String> doInBackground(Void... params) {
+        protected List<Event> doInBackground(Void... params) {
             try {
                 return getDataFromApi();
             } catch (Exception e) {
@@ -279,11 +293,11 @@ public class MainActivity extends AppCompatActivity {
          * @return List of Strings describing returned events.
          * @throws IOException
          */
-        private List<String> getDataFromApi() throws IOException {
+        private List<Event> getDataFromApi() throws IOException {
             // List the next 10 events from the primary calendar.
             //DateTime now = new DateTime(System.currentTimeMillis());
-            List<String> eventStrings = new ArrayList<String>();
-            Events events = mService.events().list("g829tv4r8rich02qtgcf2521l8@group.calendar.google.com")
+            List<Events> eventStrings = new ArrayList<Events>();
+            Events events = mService.events().list("4t6ltif9dt1tl65c7uj825miek@group.calendar.google.com")
 //                    .setMaxResults(10)
 //                    .setTimeMin(now)
 //                    .setOrderBy("startTime")
@@ -291,17 +305,18 @@ public class MainActivity extends AppCompatActivity {
                     .execute();
             List<Event> items = events.getItems();
 
-            for (Event event : items) {
-                DateTime start = event.getStart().getDateTime();
-                if (start == null) {
-                    // All-day events don't have start times, so just use
-                    // the start date.
-                    start = event.getStart().getDate();
-                }
-                eventStrings.add(
-                        String.format("%s (%s)", event.getSummary(), start));
-            }
-            return eventStrings;
+//            for (Event event : items) {
+//                DateTime start = event.getStart().getDateTime();
+//                if (start == null) {
+//                    // All-day events don't have start times, so just use
+//                    // the start date.
+//                    start = event.getStart().getDate();
+//                }
+//                eventStrings.add(
+//                        String.format("%s (%s)", event.getSummary(), start));
+//            }
+
+            return events.getItems();
         }
 
 
@@ -312,18 +327,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(List<String> output) {
+        protected void onPostExecute(List<Event> output) {
 //            mProgress.hide();
             if (output == null || output.size() == 0) {
                 mOutputText.setText("No results returned.");
             } else {
-                output.add(0, "Data retrieved using the Google Calendar API:");
-                mOutputText.setText(TextUtils.join("\n", output));
-                setCustomResourceForDates();
+//                output.add(0, "Data retrieved using the Google Calendar API:");
+//                mOutputText.setText(TextUtils.join("\n", output));
+//                setCustomResourceForDates(output);
+                parseOutput(output);
             }
         }
-
-
 
         @Override
         protected void onCancelled() {
@@ -345,6 +359,44 @@ public class MainActivity extends AppCompatActivity {
                 mOutputText.setText("Request cancelled.");
             }
         }
+    }
+
+
+    private void parseOutput(List<Event> output) {
+        summary = new ArrayList<String>();
+        ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
+        ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
+
+        for (Event e : output) {
+            summary.add(e.getSummary());
+            start.add(e.getStart());
+            end.add(e.getEnd());
+        }
+        ListView listview = (ListView) findViewById(R.id.list);
+        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, summary);
+        listview.setAdapter(adapter);
+
+        displayOutput(summary, start, end);
+        setCustomResourceForDates(start);
+
+    }
+
+    private void displayOutput(ArrayList<String> summary, ArrayList<EventDateTime> start, ArrayList<EventDateTime> end) {
+        int numEvents = summary.size();
+        String outputText = "";
+//        Log.d("************", start.toString());
+        for (int i = 0; i < numEvents; i++){
+            DateTime startTime = start.get(i).getDateTime();
+            DateTime endTime = end.get(i).getDateTime();
+//            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+
+            outputText += summary.get(i) + " \n"
+            + "Starting at: " + startTime.toString() + " \n"
+            + "Ending at: " + endTime.toString() + " \n"
+            + "\n";
+        }
+
+        mOutputText.setText(outputText);
     }
 
     @Override
@@ -387,37 +439,66 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+
+
 //    public void calendar_init(){
 //        CalendarView calendar = (CalendarView) findViewById(R.id.calendar);
 //    }
 
-    private void setCustomResourceForDates() {
+    private void setCustomResourceForDates(ArrayList<EventDateTime> events) {
         Calendar cal = Calendar.getInstance();
 
-//        Toast.makeText(MainActivity.this, Integer.toString(Calendar.DATE), Toast.LENGTH_SHORT).show();
-        String result = (String) mOutputText.getText();
-        String target = "03-";
-        ArrayList<Integer> dates = new ArrayList<Integer>();
-        for (int i = -1; (i = result.indexOf(target, i + 1)) != -1; ) {
-            dates.add(i);
-        }
+        for (EventDateTime date : events){
+//            int event = Integer.parseInt(result.substring(date + 3, date + 5));
+
+            String Ymd = date.get("dateTime").toString().substring(0, 10);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date inputDate = null;
+            try {
+                inputDate = dateFormat.parse(Ymd);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
 
 
-//        Date blueDate = null;
-        for (Integer date : dates){
-            int event = Integer.parseInt(result.substring(date + 3, date + 5));
-
-            cal.set(Calendar.DATE, event);
-            cal.add(Calendar.DATE, 0);
-            Date coloredDate = cal.getTime();
+//            cal.set(Calendar.DAY_OF_YEAR, date);
+//            cal.add(Calendar.DATE, 0);
+//            Date coloredDate = cal.getTime();
 //            blueDate = cal.getTime();
             if (caldroidFragment != null) {
                 ColorDrawable cell = new ColorDrawable(getResources().getColor(R.color.blue));
-                caldroidFragment.setBackgroundDrawableForDate(cell, coloredDate);
-                caldroidFragment.setTextColorForDate(R.color.white, coloredDate);
+                caldroidFragment.setBackgroundDrawableForDate(cell, inputDate);
+                caldroidFragment.setTextColorForDate(R.color.white, inputDate);
                 caldroidFragment.refreshView();
             }
         }
-
     }
+
+//    private void setCustomResourceForDatess(List<Object> output) {
+//        Calendar cal = Calendar.getInstance();
+//
+////        Toast.makeText(MainActivity.this, Integer.toString(Calendar.DATE), Toast.LENGTH_SHORT).show();
+//        String result = (String) mOutputText.getText();
+//        String target = "03-";
+//        ArrayList<Integer> dates = new ArrayList<Integer>();
+//        for (int i = -1; (i = result.indexOf(target, i + 1)) != -1; ) {
+//            dates.add(i);
+//        }
+//
+////        Date blueDate = null;
+//        for (Integer date : dates){
+//            int event = Integer.parseInt(result.substring(date + 3, date + 5));
+//
+//            cal.set(Calendar.DATE, event);
+//            cal.add(Calendar.DATE, 0);
+//            Date coloredDate = cal.getTime();
+////            blueDate = cal.getTime();
+//            if (caldroidFragment != null) {
+//                ColorDrawable cell = new ColorDrawable(getResources().getColor(R.color.blue));
+//                caldroidFragment.setBackgroundDrawableForDate(cell, coloredDate);
+//                caldroidFragment.setTextColorForDate(R.color.white, coloredDate);
+//                caldroidFragment.refreshView();
+//            }
+//        }
+//    }
 }
