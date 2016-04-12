@@ -8,6 +8,7 @@
         android:id="@+id/refresh_id"
         app:showAsAction="always"
         android:fontFamily="Wingdings 3"
+        android:icon="@mipmap/ic_refresh_white_48dp"
         android:title="ט" />
 
 </menu>
