@@ -26,6 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
@@ -47,8 +48,12 @@ public class HotSpotService extends Service {
     static TextView textView;
     static ListView taskList;
     static ListView newList;
+    private static ArrayList<String> summary;
     private IntentFilter receiveFilter;
 
+    private boolean inHotSpot = false;
+
+    GoogleAccountCredential credential = MainActivity.mCredential;
     public IBinder onBind(Intent intent) {
         return null;
     }
@@ -56,16 +61,37 @@ public class HotSpotService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        getData();
+    }
+
+    private void getData(){
+        RequestTask makeRequestTask = new RequestTask(credential);
+        makeRequestTask.setListener(new RequestTask.RequestTaskListener() {
+            @Override
+            public void onPreExecuteConcluded() {
+
+            }
+
+            @Override
+            public void onPostExecuteConcluded(List<Event> result) {
+                parseOutput(result);
+            }
+        });
+        makeRequestTask.execute();
+    }
+
+    private void createHotSpot(){
         DisplayMetrics displayMetrics = new DisplayMetrics();
         windowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
         windowManager2 = (WindowManager)getSystemService(WINDOW_SERVICE);
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-//        this.edgeDetector = new EdgeDetector();
 
         height = displayMetrics.heightPixels;
         width = displayMetrics.widthPixels;
         rl = new RelativeLayout(this);
         rl2 = new RelativeLayout(this);
+
+        //hotspot
         textView = new TextView(this);
 
         textView.setSingleLine();
@@ -74,66 +100,8 @@ public class HotSpotService extends Service {
         textView.setHeight((int) (0.6 * height));
         textView.setBackgroundResource(R.color.red);
 
-        final Button button = new Button(this);
-        final ImageView img = new ImageView(this);
-//        final CustomCalendarView calendar = new CustomCalendarView(this);
-//        calendar.setId(100000);
-        img.setImageResource(R.drawable.al);
-
-        LayoutInflater factory = (LayoutInflater) this.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-
-        final View textEntryView = factory.inflate(R.layout.activity_main, null);
-
-        String[] summary = MainActivity.summary.toArray(new String[MainActivity.summary.size()]);
-
-//        for (String s : MainActivity.summary){
-//            summary.add( new String(s) );
-//
-//        }
-
-        ArrayList<String> fds = new ArrayList<>();
-        fds.add("fdsa");
-
-        ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
-        ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
-
-
-
-
-        taskList =  (ListView) textEntryView.findViewById(R.id.list);
         newList = new ListView(this);
-        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, summary){
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view =super.getView(position, convertView, parent);
-
-                TextView textView=(TextView) view.findViewById(android.R.id.text1);
-
-            /*YOUR CHOICE OF COLOR*/
-                textView.setTextColor(Color.BLACK);
-
-                return view;
-            }
-        };
-        newList.setAdapter(adapter);
-        newList.setBackgroundColor(getResources().getColor(R.color.white));
-
-//        newList.setText(MainActivity.mOutputText.getText());
-//        newList.setBackgroundColor(getResources().getColor(R.color.white));
-//        newList.setTextColor(getResources().getColor(R.color.black));
-
-        RelativeLayout.LayoutParams layoutParams_calendar =
-                new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams_calendar.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-
-        RelativeLayout.LayoutParams layoutParams_text =
-                new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-//        layoutParams_text.addRule(RelativeLayout.BELOW, calendar.getId());
-
-//        rl2.addView(calendar, layoutParams_calendar);
-//        rl2.addView(newList, layoutParams_text);
-          rl2.addView(newList, layoutParams_text);
-
+        setSummary();
 
         final WindowManager.LayoutParams layoutParams3 = new WindowManager.LayoutParams();
         layoutParams3.height = WindowManager.LayoutParams.MATCH_PARENT;
@@ -147,11 +115,14 @@ public class HotSpotService extends Service {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        inHotSpot = true;
+                        getData();
                         textView.setBackgroundResource(R.color.white);
                         windowManager2.addView(rl2, layoutParams3);
                         break;
 
                     case MotionEvent.ACTION_UP:
+                        inHotSpot = false;
                         textView.setBackgroundResource(R.color.red);
                         windowManager2.removeView(rl2);
                         break;
@@ -171,8 +142,34 @@ public class HotSpotService extends Service {
         layoutParams2.gravity = Gravity.RIGHT;
         windowManager.addView(rl, layoutParams2);
 
+    }
 
+    private void setSummary(){
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, summary){
 
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view =super.getView(position, convertView, parent);
+
+                TextView textView=(TextView) view.findViewById(android.R.id.text1);
+
+                textView.setTextColor(Color.BLACK);
+
+                return view;
+            }
+        };
+
+        newList.setAdapter(adapter);
+        newList.setBackgroundColor(getResources().getColor(R.color.white));
+
+        RelativeLayout.LayoutParams layoutParams_text =
+                new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        if (!inHotSpot) {
+            rl2.addView(newList, layoutParams_text);
+        } else {
+            rl2.removeView(newList);
+            rl2.addView(newList, layoutParams_text);
+        }
     }
 
     @Override
@@ -188,18 +185,33 @@ public class HotSpotService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // Let it continue running until it is stopped.
-//        Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
         return START_STICKY;
     }
 
+
+    private void parseOutput(List<Event> output) {
+        summary = new ArrayList<String>();
+        ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
+        ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
+
+        for (Event e : output) {
+            summary.add(e.getSummary());
+            start.add(e.getStart());
+            end.add(e.getEnd());
+        }
+        if (!inHotSpot) {
+            createHotSpot();
+        } else {
+            setSummary();
+        }
+
+    }
 }
 
 class Gestures extends GestureDetector.SimpleOnGestureListener {
 
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY){
         if (e1.getX() < HotSpotService.width) {
-//            HotSpotService.textView.setBackgroundResource(R.color.black);
             return true;
         }
         return false;

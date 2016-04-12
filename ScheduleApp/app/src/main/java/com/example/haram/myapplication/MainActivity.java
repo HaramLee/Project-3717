@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     ViewPager viewpager;
     FragmentPageAdapter ft;
-    GoogleAccountCredential mCredential;
+    public static GoogleAccountCredential mCredential;
     public static TextView mOutputText;
 //    ProgressDialog mProgress;
 
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
-    public static ArrayList<String> summary;
+    public static  ArrayList<String> summary;
 
     private CaldroidFragment caldroidFragment;
 
@@ -282,12 +282,12 @@ public class MainActivity extends AppCompatActivity {
         for (Event e : output) {
             summary.add(e.getSummary());
             start.add(e.getStart());
+
             end.add(e.getEnd());
         }
         ListView listview = (ListView) findViewById(R.id.list);
         final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, summary);
         listview.setAdapter(adapter);
-
         displayOutput(summary, start, end);
         setCustomResourceForDates(start);
 
@@ -297,13 +297,19 @@ public class MainActivity extends AppCompatActivity {
         int numEvents = summary.size();
         String outputText = "";
         for (int i = 0; i < numEvents; i++){
-            DateTime startTime = start.get(i).getDateTime();
-            DateTime endTime = end.get(i).getDateTime();
+          if (start.get(i).getDateTime() != null) {
+              DateTime startTime = start.get(i).getDateTime();
+              DateTime endTime = end.get(i).getDateTime();
 
-            outputText += summary.get(i) + " \n"
-            + "Starting at: " + startTime.toString() + " \n"
-            + "Ending at: " + endTime.toString() + " \n"
-            + "\n";
+              outputText += summary.get(i) + " \n"
+                      + "Starting at: " + startTime.toString() + " \n"
+                      + "Ending at: " + endTime.toString() + " \n"
+                      + "\n";
+          } else {
+              DateTime startDate = start.get(i).getDate();
+              outputText += summary.get(i) + " \n"
+                      + "Starting at: " + startDate.toString() + " \n";
+          }
         }
 
         mOutputText.setText(outputText);
@@ -355,15 +361,21 @@ public class MainActivity extends AppCompatActivity {
 
         for (EventDateTime date : events){
 //            int event = Integer.parseInt(result.substring(date + 3, date + 5));
-
-            String Ymd = date.get("dateTime").toString().substring(0, 10);
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date inputDate = null;
+            String Ymd;
+            if (date.get("dateTime") != null) {
+                Ymd = date.get("dateTime").toString().substring(0, 10);
+            } else {
+                Ymd = date.get("date").toString();
+            }
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
                 inputDate = dateFormat.parse(Ymd);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
+
+
 
 
 //            cal.set(Calendar.DAY_OF_YEAR, date);
