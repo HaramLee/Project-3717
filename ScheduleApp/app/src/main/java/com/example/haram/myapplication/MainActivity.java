@@ -23,6 +23,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.ListView;
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     FragmentPageAdapter ft;
     public static GoogleAccountCredential mCredential;
     public static TextView mOutputText;
+    public static String selectedCalendar;
 //    ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
@@ -99,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         mOutputText = (TextView) findViewById(R.id.glance);
 
-        // Initialize credentials and service object.
+//         Initialize credentials and service object.
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
@@ -137,13 +140,30 @@ public class MainActivity extends AppCompatActivity {
                 for (CalendarListEntry entry : result) {
                     calendars.add(entry.getSummary());
                 }
+                selectedCalendar = calendars.get(0);
             }
         });
         calen.execute();
 
+
+
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, calendars);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerArrayAdapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("******", (String) parent.getItemAtPosition(position));
+                selectedCalendar = (String) parent.getItemAtPosition(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
 
 
@@ -311,9 +331,9 @@ public class MainActivity extends AppCompatActivity {
 
             end.add(e.getEnd());
         }
-        ListView listview = (ListView) findViewById(R.id.list);
-        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, summary);
-        listview.setAdapter(adapter);
+//        ListView listview = (ListView) findViewById(R.id.list);
+//        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, summary);
+//        listview.setAdapter(adapter);
         displayOutput(summary, start, end);
         setCustomResourceForDates(start);
 
@@ -321,24 +341,29 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayOutput(ArrayList<String> summary, ArrayList<EventDateTime> start, ArrayList<EventDateTime> end) {
         int numEvents = summary.size();
-        String outputText = "";
+        ArrayList<String> output = new ArrayList<String>();
         for (int i = 0; i < numEvents; i++){
-          if (start.get(i).getDateTime() != null) {
-              DateTime startTime = start.get(i).getDateTime();
-              DateTime endTime = end.get(i).getDateTime();
+            String outputText = "";
+            if (start.get(i).getDateTime() != null) {
+                DateTime startTime = start.get(i).getDateTime();
+                DateTime endTime = end.get(i).getDateTime();
 
-              outputText += summary.get(i) + " \n"
-                      + "Starting at: " + startTime.toString() + " \n"
-                      + "Ending at: " + endTime.toString() + " \n"
-                      + "\n";
-          } else {
-              DateTime startDate = start.get(i).getDate();
-              outputText += summary.get(i) + " \n"
-                      + "Starting at: " + startDate.toString() + " \n";
-          }
+                outputText += summary.get(i) + " \n"
+                        + "Starting at: " + startTime.toString() + " \n"
+                        + "Ending at: " + endTime.toString() + " \n"
+                        + "\n";
+            } else {
+                DateTime startDate = start.get(i).getDate();
+                outputText += summary.get(i) + " \n"
+                        + "Starting at: " + startDate.toString() + " \n";
+            }
+            output.add(outputText);
         }
+        ListView listview = (ListView) findViewById(R.id.list);
+        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, output);
+        listview.setAdapter(adapter);
 
-        mOutputText.setText(outputText);
+
     }
 
     @Override
