@@ -21,22 +21,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
+public class RequestCalendarList extends AsyncTask<Void, Void, List<CalendarListEntry>> {
     private com.google.api.services.calendar.Calendar mService = null;
     private Exception mLastError = null;
 
-    public interface RequestTaskListener {
+    public interface RequestCalendarListListener {
         void onPreExecuteConcluded();
-        void onPostExecuteConcluded(List<Event> result);
+        void onPostExecuteConcluded(List<CalendarListEntry> result);
     }
 
-    private RequestTaskListener listener;
+    private RequestCalendarListListener listener;
 
-    final public void setListener(RequestTaskListener rlistener) {
+    final public void setListener(RequestCalendarListListener rlistener) {
         listener = rlistener;
     }
 
-    public RequestTask(GoogleAccountCredential credential) {
+    public RequestCalendarList(GoogleAccountCredential credential) {
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         mService = new com.google.api.services.calendar.Calendar.Builder(
@@ -50,7 +50,7 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
      * @param params no parameters needed for this task.
      */
     @Override
-    final protected List<Event> doInBackground(Void... params) {
+    final protected List<CalendarListEntry> doInBackground(Void... params) {
         try {
             return getDataFromApi();
         } catch (Exception e) {
@@ -65,24 +65,17 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
      * @return List of Strings describing returned events.
      * @throws IOException
      */
-    private List<Event> getDataFromApi() throws IOException {
-        List<Events> eventStrings = new ArrayList<Events>();
-
+    private List<CalendarListEntry> getDataFromApi() throws IOException {
         CalendarList cal = mService.calendarList().list().execute();
 
-        for (CalendarListEntry entry : cal.getItems()){
-            Log.d("***", entry.getSummary());
-            if (entry.getSummary().equals("Home Games")){
-                Log.d("*****", entry.getId());
-            }
-        }
+//        for (CalendarListEntry entry : cal.getItems()){
+//            Log.d("***", entry.getSummary());
+//            if (entry.getSummary().equals("Home Games")){
+//                Log.d("*****", entry.getId());
+//            }
+//        }
 
-
-        Events events = mService.events().list("4t6ltif9dt1tl65c7uj825miek@group.calendar.google.com")
-                .execute();
-        List<Event> items = events.getItems();
-
-        return events.getItems();
+        return cal.getItems();
     }
 
 
@@ -94,7 +87,7 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
 
 
     @Override
-    protected void onPostExecute(List<Event> output) {
+    protected void onPostExecute(List<CalendarListEntry> output) {
         if (listener != null)
             listener.onPostExecuteConcluded(output);
     }

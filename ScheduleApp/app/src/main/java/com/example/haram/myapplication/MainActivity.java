@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -119,6 +121,30 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         t.replace(R.id.calendar1, caldroidFragment);
         t.commit();
+
+        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+
+        final ArrayList<String> calendars = new ArrayList<String>();
+        RequestCalendarList calen = new RequestCalendarList(mCredential);
+        calen.setListener(new RequestCalendarList.RequestCalendarListListener() {
+            @Override
+            public void onPreExecuteConcluded() {
+
+            }
+
+            @Override
+            public void onPostExecuteConcluded(List<CalendarListEntry> result) {
+                for (CalendarListEntry entry : result) {
+                    calendars.add(entry.getSummary());
+                }
+            }
+        });
+        calen.execute();
+
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, calendars);
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(spinnerArrayAdapter);
+
 
 
     }
