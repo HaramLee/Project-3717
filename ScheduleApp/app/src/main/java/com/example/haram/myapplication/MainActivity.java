@@ -196,11 +196,27 @@ public class MainActivity extends AppCompatActivity {
             chooseAccount();
         } else {
             if (isDeviceOnline()) {
-                new MakeRequestTask(mCredential).execute();
+                getData();
             } else {
                 mOutputText.setText("No network connection available.");
             }
         }
+    }
+
+    private void getData() {
+        RequestTask makeRequestTask = new RequestTask(mCredential);
+        makeRequestTask.setListener(new RequestTask.RequestTaskListener() {
+            @Override
+            public void onPreExecuteConcluded() {
+
+            }
+
+            @Override
+            public void onPostExecuteConcluded(List<Event> result) {
+                parseOutput(result);
+            }
+        });
+        makeRequestTask.execute();
     }
 
     /**
@@ -256,110 +272,6 @@ public class MainActivity extends AppCompatActivity {
                 REQUEST_GOOGLE_PLAY_SERVICES);
 //        dialog.show();
     }
-    /**
-     * An asynchronous task that handles the Google Calendar API call.
-     * Placing the API calls in their own task ensures the UI stays responsive.
-     */
-    private class MakeRequestTask extends AsyncTask<Void, Void, List<Event>> {
-        private com.google.api.services.calendar.Calendar mService = null;
-        private Exception mLastError = null;
-
-        public MakeRequestTask(GoogleAccountCredential credential) {
-            HttpTransport transport = AndroidHttp.newCompatibleTransport();
-            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            mService = new com.google.api.services.calendar.Calendar.Builder(
-                    transport, jsonFactory, credential)
-                    .setApplicationName("Google Calendar API Android Quickstart")
-                    .build();
-        }
-
-        /**
-         * Background task to call Google Calendar API.
-         * @param params no parameters needed for this task.
-         */
-        @Override
-        protected List<Event> doInBackground(Void... params) {
-            try {
-                return getDataFromApi();
-            } catch (Exception e) {
-                mLastError = e;
-                cancel(true);
-                return null;
-            }
-        }
-
-        /**
-         * Fetch a list of the next 10 events from the primary calendar.
-         * @return List of Strings describing returned events.
-         * @throws IOException
-         */
-        private List<Event> getDataFromApi() throws IOException {
-            // List the next 10 events from the primary calendar.
-            //DateTime now = new DateTime(System.currentTimeMillis());
-            List<Events> eventStrings = new ArrayList<Events>();
-            Events events = mService.events().list("4t6ltif9dt1tl65c7uj825miek@group.calendar.google.com")
-//                    .setMaxResults(10)
-//                    .setTimeMin(now)
-//                    .setOrderBy("startTime")
-//                    .setSingleEvents(true)
-                    .execute();
-            List<Event> items = events.getItems();
-
-//            for (Event event : items) {
-//                DateTime start = event.getStart().getDateTime();
-//                if (start == null) {
-//                    // All-day events don't have start times, so just use
-//                    // the start date.
-//                    start = event.getStart().getDate();
-//                }
-//                eventStrings.add(
-//                        String.format("%s (%s)", event.getSummary(), start));
-//            }
-
-            return events.getItems();
-        }
-
-
-        @Override
-        protected void onPreExecute() {
-            mOutputText.setText("");
-//            mProgress.show();
-        }
-
-        @Override
-        protected void onPostExecute(List<Event> output) {
-//            mProgress.hide();
-            if (output == null || output.size() == 0) {
-                mOutputText.setText("No results returned.");
-            } else {
-//                output.add(0, "Data retrieved using the Google Calendar API:");
-//                mOutputText.setText(TextUtils.join("\n", output));
-//                setCustomResourceForDates(output);
-                parseOutput(output);
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-//            mProgress.hide();
-            if (mLastError != null) {
-                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
-                    showGooglePlayServicesAvailabilityErrorDialog(
-                            ((GooglePlayServicesAvailabilityIOException) mLastError)
-                                    .getConnectionStatusCode());
-                } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                    startActivityForResult(
-                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            MainActivity.REQUEST_AUTHORIZATION);
-                } else {
-                    mOutputText.setText("The following error occurred:\n"
-                            + mLastError.getMessage());
-                }
-            } else {
-                mOutputText.setText("Request cancelled.");
-            }
-        }
-    }
 
 
     private void parseOutput(List<Event> output) {
@@ -384,11 +296,9 @@ public class MainActivity extends AppCompatActivity {
     private void displayOutput(ArrayList<String> summary, ArrayList<EventDateTime> start, ArrayList<EventDateTime> end) {
         int numEvents = summary.size();
         String outputText = "";
-//        Log.d("************", start.toString());
         for (int i = 0; i < numEvents; i++){
             DateTime startTime = start.get(i).getDateTime();
             DateTime endTime = end.get(i).getDateTime();
-//            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
             outputText += summary.get(i) + " \n"
             + "Starting at: " + startTime.toString() + " \n"
@@ -430,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(j);
                 break;
             case R.id.refresh_id:
-                new MakeRequestTask(mCredential).execute();
+                getData();
                 caldroidFragment.refreshView();
                 break;
             default:
@@ -439,11 +349,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-
-
-//    public void calendar_init(){
-//        CalendarView calendar = (CalendarView) findViewById(R.id.calendar);
-//    }
 
     private void setCustomResourceForDates(ArrayList<EventDateTime> events) {
         Calendar cal = Calendar.getInstance();
@@ -473,32 +378,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-//    private void setCustomResourceForDatess(List<Object> output) {
-//        Calendar cal = Calendar.getInstance();
-//
-////        Toast.makeText(MainActivity.this, Integer.toString(Calendar.DATE), Toast.LENGTH_SHORT).show();
-//        String result = (String) mOutputText.getText();
-//        String target = "03-";
-//        ArrayList<Integer> dates = new ArrayList<Integer>();
-//        for (int i = -1; (i = result.indexOf(target, i + 1)) != -1; ) {
-//            dates.add(i);
-//        }
-//
-////        Date blueDate = null;
-//        for (Integer date : dates){
-//            int event = Integer.parseInt(result.substring(date + 3, date + 5));
-//
-//            cal.set(Calendar.DATE, event);
-//            cal.add(Calendar.DATE, 0);
-//            Date coloredDate = cal.getTime();
-////            blueDate = cal.getTime();
-//            if (caldroidFragment != null) {
-//                ColorDrawable cell = new ColorDrawable(getResources().getColor(R.color.blue));
-//                caldroidFragment.setBackgroundDrawableForDate(cell, coloredDate);
-//                caldroidFragment.setTextColorForDate(R.color.white, coloredDate);
-//                caldroidFragment.refreshView();
-//            }
-//        }
-//    }
 }
