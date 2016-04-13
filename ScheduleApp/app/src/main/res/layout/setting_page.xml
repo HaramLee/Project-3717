@@ -10,7 +10,7 @@
 
         <CheckBoxPreference
             android:key="sw_switch"
-            android:title="Option 1"
+            android:title="Hot Spot"
             android:summary="Tick to set this option"
             android:defaultValue="false"/>
 
@@ -21,8 +21,8 @@
 
         <ListPreference
             android:key="pref_type"
-            android:title="Type"
-            android:summary="Select item from array"
+            android:title="Calendar View Option"
+            android:summary="Select item from the list"
             android:entries="@array/list_calendar"
             android:entryValues="@array/types_values"
             android:defaultValue="1"
