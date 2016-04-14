@@ -156,9 +156,7 @@ public class HotSpotService extends Service {
     }
 
     private void setSummary(ArrayList<HashMap<String, String>> datalist){
-
-        //listview.setAdapter(adapter);
-
+        
         final ListAdapterHot adapter = new ListAdapterHot(this, datalist){
 
             @Override
@@ -170,10 +168,7 @@ public class HotSpotService extends Service {
             }
         };
         newList.setBackgroundColor(getResources().getColor(R.color.white));
-
         newList.setAdapter(adapter);
-        //newList.setBackgroundColor(getResources().getColor(R.color.white));
-
 
         RelativeLayout.LayoutParams layoutParams_text =
                 new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -206,39 +201,27 @@ public class HotSpotService extends Service {
     static final String KEY_START = "start";
     static final String KEY_END = "end";
     static final String KEY_SUMMARY = "summary";
-    static final String KEY_COLOR = "color";
+    static final String KEY_MONTH = "month";
+    static final String KEY_YEAR = "year";
 
     private void parseOutput(List<Event> output) {
         summary = new ArrayList<String>();
         ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
-        ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
         ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
 
-        String init="",fin="",last="",startHour="",endHour="";
+        String init="",fin="",last="",startHour="",endHour="",month="",year="";
         Date dates = null;
         DateTime startTime = null, endTime = null;
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         for (Event e : output) {
-            summary.add(e.getSummary());
-            start.add(e.getStart());
-            end.add(e.getEnd());
 
-//            DateTime startTime = (e.getStart()).getDateTime();
-//            DateTime endTime = (e.getEnd()).getDateTime();
-            Log.d("*****e.getStart*", e.getStart().toString());
-//            Log.d("*****e.getStart*", e.getStart().get("date").toString());
-//            Log.d("*****e.getStart*", e.getStart().get("dateTime").toString());
-
-
-            if (e.getStart().containsKey("date")) {
-                Log.d("********", "date exists");
+            if (e.getStatus().equals("cancelled")){
+                continue;
+            } else if (e.getStart().containsKey("date")) {
+                start.add(e.getStart());
+                summary.add(e.getSummary());
                 startTime = (DateTime) e.getStart().get("date");
-                endTime = (DateTime) e.getEnd().get("date");
-                Log.d("***********", startTime.toString());
-
-                //String color = e.getColorId();
                 String Ymd = startTime.toString();
-                String initTime = endTime.toString();
 
                 try {
                     dates = dateFormat.parse(Ymd);
@@ -252,15 +235,13 @@ public class HotSpotService extends Service {
 
                 startHour = "00:00";
                 endHour = "23:59";
-            }
 
-            if (e.getStart().containsKey("dateTime")) {
-                Log.d("********", "dateTime exists");
+            } else if (e.getStart().containsKey("dateTime")) {
+                start.add(e.getStart());
+                summary.add(e.getSummary());
                 startTime = (DateTime) e.getStart().get("dateTime");
                 endTime = (DateTime) e.getEnd().get("dateTime");
-                Log.d("***********", endTime.toString());
 
-                //String color = e.getColorId();
                 String Ymd = startTime.toString();
                 String initTime = endTime.toString();
 
@@ -279,6 +260,9 @@ public class HotSpotService extends Service {
 
             }
 
+            month = init.substring(4,8);
+            year = startTime.toString().substring(0,4);
+
 
             HashMap<String, String> map = new HashMap<String, String>();
             map.put(KEY_SUMMARY, e.getSummary());
@@ -286,8 +270,11 @@ public class HotSpotService extends Service {
             map.put(KEY_END, "End:  " + endHour);
             map.put(KEY_DATE,fin);//word
             map.put(KEY_DAY,last);//number
+            map.put(KEY_YEAR,year);
+            map.put(KEY_MONTH,month);
             //map.put(KEY_COLOR,color);//number
             datalist.add(map);
+
 
         }
 

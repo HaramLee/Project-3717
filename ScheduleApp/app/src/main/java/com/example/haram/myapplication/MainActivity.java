@@ -50,8 +50,6 @@ import com.roomorama.caldroid.CaldroidFragment;
 
 public class MainActivity extends AppCompatActivity {
 
-    ViewPager viewpager;
-    FragmentPageAdapter ft;
     public static GoogleAccountCredential mCredential;
 
 //    ProgressDialog mProgress;
@@ -77,18 +75,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //        mProgress = new ProgressDialog(this);
-//        mProgress.setMessage("Calling Google Calendar API ...");
-        System.out.println("THIS IS THE ASDASKDJASKD" );
-        if(lay == 1) {
-            setContentView(R.layout.activity_main);
-        } else if (lay == 2){
-            setContentView(R.layout.mainpage);
-        }
-//        viewpager = (ViewPager) findViewById(R.id.pager);
-//        ft = new FragmentPageAdapter(getSupportFragmentManager());
+        setContentView(R.layout.activity_main);
 
-//        viewpager.setAdapter(ft);
         sharedpreferences = getSharedPreferences(PREF_CAL_ID, Context.MODE_PRIVATE);
 
         // Initialize credentials and service object.
@@ -326,7 +314,6 @@ public class MainActivity extends AppCompatActivity {
 
         summary = new ArrayList<String>();
         ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
-//        ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
         ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
 
         String init="",fin="",last="",startHour="",endHour="",month="",year="";
@@ -341,11 +328,8 @@ public class MainActivity extends AppCompatActivity {
                 start.add(e.getStart());
                 summary.add(e.getSummary());
                 startTime = (DateTime) e.getStart().get("date");
-                endTime = (DateTime) e.getEnd().get("date");
-
-                //String color = e.getColorId();
                 String Ymd = startTime.toString();
-                String initTime = endTime.toString();
+
 
                 try {
                     dates = dateFormat.parse(Ymd);
@@ -366,12 +350,9 @@ public class MainActivity extends AppCompatActivity {
                 startTime = (DateTime) e.getStart().get("dateTime");
                 endTime = (DateTime) e.getEnd().get("dateTime");
 
-
-                //String color = e.getColorId();
                 String Ymd = startTime.toString();
                 String initTime = endTime.toString();
-                Log.d("******** - ymd", Ymd);
-                Log.d("******** - initTime", initTime);
+
                 try {
                     dates = dateFormat.parse(Ymd);
                 } catch (ParseException j) {
@@ -379,7 +360,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 init = dates.toString();
-                Log.d("******** - init", init);
                 fin = init.substring(0, 4);
                 last = init.substring(8,11);
 
@@ -389,7 +369,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             month = init.substring(4,8);
-            year = startTime.toString().substring(0,5);
+            year = startTime.toString().substring(0,4);
 
 
             HashMap<String, String> map = new HashMap<String, String>();
@@ -400,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
             map.put(KEY_DAY,last);//number
             map.put(KEY_YEAR,year);
             map.put(KEY_MONTH,month);
-            //map.put(KEY_COLOR,color);//number
+
             datalist.add(map);
 
 
