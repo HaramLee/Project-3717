@@ -23,8 +23,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.ListView;
@@ -32,8 +30,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
@@ -59,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
     FragmentPageAdapter ft;
     public static GoogleAccountCredential mCredential;
     public static TextView mOutputText;
-    public static String selectedCalendar;
 //    ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        mProgress = new ProgressDialog(this);
+        //        mProgress = new ProgressDialog(this);
 //        mProgress.setMessage("Calling Google Calendar API ...");
 
         setContentView(R.layout.activity_main);
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
         mOutputText = (TextView) findViewById(R.id.glance);
 
-//         Initialize credentials and service object.
+        // Initialize credentials and service object.
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
@@ -140,31 +141,19 @@ public class MainActivity extends AppCompatActivity {
                 for (CalendarListEntry entry : result) {
                     calendars.add(entry.getSummary());
                 }
-                selectedCalendar = calendars.get(0);
             }
         });
         calen.execute();
 
 
+
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
+
+
 
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, calendars);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerArrayAdapter);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("******", (String) parent.getItemAtPosition(position));
-                selectedCalendar = (String) parent.getItemAtPosition(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
 
 
 
@@ -319,22 +308,65 @@ public class MainActivity extends AppCompatActivity {
                 REQUEST_GOOGLE_PLAY_SERVICES);
 //        dialog.show();
     }
+    static final String KEY_DATE = "date";
+    static final String KEY_DAY = "day";
+    static final String KEY_START = "start";
+    static final String KEY_END = "end";
+    static final String KEY_SUMMARY = "summary";
+    static final String KEY_COLOR = "color";
 
 
     private void parseOutput(List<Event> output) {
+
         summary = new ArrayList<String>();
         ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
         ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
+        ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
+
+        String init,fin,last;
+        Date dates = null;
 
         for (Event e : output) {
             summary.add(e.getSummary());
             start.add(e.getStart());
-
             end.add(e.getEnd());
+
+            DateTime startTime = (e.getStart()).getDateTime();
+            DateTime endTime = (e.getEnd()).getDateTime();
+
+            //String color = e.getColorId();
+            String Ymd = startTime.toString();
+            String initTime = endTime.toString();
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                dates = dateFormat.parse(Ymd);
+            } catch (ParseException j) {
+                j.printStackTrace();
+            }
+
+            init = dates.toString();
+            fin = init.substring(0, 4);
+            last = init.substring(8,11);
+
+            String hour = Ymd.substring(11,16);
+            String hour2 = initTime.substring(11,16);
+
+            HashMap<String, String> map = new HashMap<String, String>();
+            map.put(KEY_SUMMARY, e.getSummary());
+            map.put(KEY_START, "Start: " + hour);
+            map.put(KEY_END, "End: " + hour2);
+            map.put(KEY_DATE,fin);//word
+            map.put(KEY_DAY,last);//number
+            //map.put(KEY_COLOR,color);//number
+            datalist.add(map);
+
         }
-//        ListView listview = (ListView) findViewById(R.id.list);
-//        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, summary);
-//        listview.setAdapter(adapter);
+        ListView listview = (ListView) findViewById(R.id.list);
+
+        ListAdapter adapter = new ListAdapter(this, datalist);
+        listview.setAdapter(adapter);
+
         displayOutput(summary, start, end);
         setCustomResourceForDates(start);
 
@@ -342,29 +374,24 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayOutput(ArrayList<String> summary, ArrayList<EventDateTime> start, ArrayList<EventDateTime> end) {
         int numEvents = summary.size();
-        ArrayList<String> output = new ArrayList<String>();
+        String outputText = "";
         for (int i = 0; i < numEvents; i++){
-            String outputText = "";
-            if (start.get(i).getDateTime() != null) {
-                DateTime startTime = start.get(i).getDateTime();
-                DateTime endTime = end.get(i).getDateTime();
+          if (start.get(i).getDateTime() != null) {
+              DateTime startTime = start.get(i).getDateTime();
+              DateTime endTime = end.get(i).getDateTime();
 
-                outputText += summary.get(i) + " \n"
-                        + "Starting at: " + startTime.toString() + " \n"
-                        + "Ending at: " + endTime.toString() + " \n"
-                        + "\n";
-            } else {
-                DateTime startDate = start.get(i).getDate();
-                outputText += summary.get(i) + " \n"
-                        + "Starting at: " + startDate.toString() + " \n";
-            }
-            output.add(outputText);
+              outputText += summary.get(i) + " \n"
+                      + "Starting at: " + startTime.toString() + " \n"
+                      + "Ending at: " + endTime.toString() + " \n"
+                      + "\n";
+          } else {
+              DateTime startDate = start.get(i).getDate();
+              outputText += summary.get(i) + " \n"
+                      + "Starting at: " + startDate.toString() + " \n";
+          }
         }
-        ListView listview = (ListView) findViewById(R.id.list);
-        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, output);
-        listview.setAdapter(adapter);
 
-
+        mOutputText.setText(outputText);
     }
 
     @Override
