@@ -6,10 +6,12 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,13 +25,14 @@ import android.widget.TextView;
 
 import java.util.Calendar;
 
+
 /**
  * Created by Haram on 2016-02-01.
  */
 public class setting_display extends PreferenceActivity {
 
     private LinearLayout background;
-
+    static int layoutId = 1;
 
 
     @Override
@@ -55,6 +58,16 @@ public class setting_display extends PreferenceActivity {
             }
         });
 
+        final ListPreference listChange = (ListPreference)findPreference("pref_type");
+        String currentValue = listChange.getValue();
+        Log.d("***********", currentValue);
+        if(currentValue.equals("1")){
+            layoutId = 1;
+            System.out.println(layoutId);
+        } else if (currentValue.equals("2")){
+            layoutId = 2;
+            System.out.println(layoutId);
+        }
     }
 
     // String

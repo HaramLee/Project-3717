@@ -2,28 +2,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <TextView
+    <TextView style="@style/TextColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/date"
         android:textSize="15dip"
         android:paddingLeft="15dip"
         android:textStyle="bold"/>
-    <TextView
+    <TextView style="@style/TextColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/day"
         android:textSize="10dip"
         android:paddingLeft="15dip"
         android:layout_below="@+id/date"/>
-    <TextView
+    <TextView style="@style/TextColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/start"
         android:paddingLeft="80dip"
         android:textSize="10dip"
         />
-    <TextView
+    <TextView style="@style/TextColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/end"
@@ -31,7 +31,7 @@
         android:paddingLeft="80dip"
 
         android:textSize="10dip"/>
-    <TextView
+    <TextView style="@style/TextColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/summary"
@@ -39,7 +39,7 @@
 
         android:textSize="15dip"/>
 
-    <TextView
+    <TextView style="@style/TextColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/color"

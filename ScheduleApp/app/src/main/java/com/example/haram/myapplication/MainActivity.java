@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     public static  ArrayList<String> summary;
 
     private CaldroidFragment caldroidFragment;
-
+    public static int lay = setting_display.layoutId;
     private IntentFilter receiveFilter;
 
     @Override
@@ -92,9 +92,12 @@ public class MainActivity extends AppCompatActivity {
 
         //        mProgress = new ProgressDialog(this);
 //        mProgress.setMessage("Calling Google Calendar API ...");
-
-        setContentView(R.layout.activity_main);
-
+        System.out.println("THIS IS THE ASDASKDJASKD" );
+        if(lay == 1) {
+            setContentView(R.layout.activity_main);
+        } else if (lay == 2){
+            setContentView(R.layout.mainpage);
+        }
 //        viewpager = (ViewPager) findViewById(R.id.pager);
 //        ft = new FragmentPageAdapter(getSupportFragmentManager());
 
@@ -322,54 +325,76 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
         ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
 
-        String init,fin,last,startHour,endHour;
+        String init="",fin="",last="",startHour="",endHour="";
         Date dates = null;
-
+        DateTime startTime = null, endTime = null;
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         for (Event e : output) {
             summary.add(e.getSummary());
             start.add(e.getStart());
             end.add(e.getEnd());
 
-            DateTime startTime = (e.getStart()).getDateTime();
-            DateTime endTime = (e.getEnd()).getDateTime();
+//            DateTime startTime = (e.getStart()).getDateTime();
+//            DateTime endTime = (e.getEnd()).getDateTime();
             Log.d("*****e.getStart*", e.getStart().toString());
 //            Log.d("*****e.getStart*", e.getStart().get("date").toString());
 //            Log.d("*****e.getStart*", e.getStart().get("dateTime").toString());
+
+
             if (e.getStart().containsKey("date")) {
                 Log.d("********", "date exists");
                 startTime = (DateTime) e.getStart().get("date");
                 endTime = (DateTime) e.getEnd().get("date");
                 Log.d("***********", startTime.toString());
+
+                //String color = e.getColorId();
+                String Ymd = startTime.toString();
+                String initTime = endTime.toString();
+
+                try {
+                    dates = dateFormat.parse(Ymd);
+                } catch (ParseException j) {
+                    j.printStackTrace();
+                }
+
+                init = dates.toString();
+                fin = init.substring(0, 4);
+                last = init.substring(8,11);
+
+                startHour = "00:00";
+                endHour = "23:59";
             }
+
             if (e.getStart().containsKey("dateTime")) {
                 Log.d("********", "dateTime exists");
                 startTime = (DateTime) e.getStart().get("dateTime");
                 endTime = (DateTime) e.getEnd().get("dateTime");
                 Log.d("***********", endTime.toString());
+
+                //String color = e.getColorId();
+                String Ymd = startTime.toString();
+                String initTime = endTime.toString();
+
+                try {
+                    dates = dateFormat.parse(Ymd);
+                } catch (ParseException j) {
+                    j.printStackTrace();
+                }
+
+                init = dates.toString();
+                fin = init.substring(0, 4);
+                last = init.substring(8,11);
+
+                startHour = Ymd.substring(11,16);
+                endHour = initTime.substring(11,16);
+
             }
 
-            //String color = e.getColorId();
-            String Ymd = startTime.toString();
-            String initTime = endTime.toString();
-
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            try {
-                dates = dateFormat.parse(Ymd);
-            } catch (ParseException j) {
-                j.printStackTrace();
-            }
-
-            init = dates.toString();
-            fin = init.substring(0, 4);
-            last = init.substring(8,11);
-
-            startHour = Ymd.substring(11,16);
-            endHour = initTime.substring(11,16);
 
             HashMap<String, String> map = new HashMap<String, String>();
             map.put(KEY_SUMMARY, e.getSummary());
             map.put(KEY_START, "Start: " + startHour);
-            map.put(KEY_END, "End: " + endHour);
+            map.put(KEY_END, "End:  " + endHour);
             map.put(KEY_DATE,fin);//word
             map.put(KEY_DAY,last);//number
             //map.put(KEY_COLOR,color);//number
