@@ -325,7 +325,8 @@ public class MainActivity extends AppCompatActivity {
     static final String KEY_START = "start";
     static final String KEY_END = "end";
     static final String KEY_SUMMARY = "summary";
-    static final String KEY_COLOR = "color";
+    static final String KEY_MONTH = "month";
+    static final String KEY_YEAR = "year";
 
 
     private void parseOutput(List<Event> output) {
@@ -335,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
         ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
 
-        String init="",fin="",last="",startHour="",endHour="";
+        String init="",fin="",last="",startHour="",endHour="",month="",year="";
         Date dates = null;
         DateTime startTime = null, endTime = null;
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -387,7 +388,8 @@ public class MainActivity extends AppCompatActivity {
                 //String color = e.getColorId();
                 String Ymd = startTime.toString();
                 String initTime = endTime.toString();
-
+                Log.d("******** - ymd", Ymd);
+                Log.d("******** - initTime", initTime);
                 try {
                     dates = dateFormat.parse(Ymd);
                 } catch (ParseException j) {
@@ -395,6 +397,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 init = dates.toString();
+                Log.d("******** - init", init);
                 fin = init.substring(0, 4);
                 last = init.substring(8,11);
 
@@ -403,12 +406,18 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
+            month = init.substring(4,8);
+            year = startTime.toString().substring(0,5);
+
+
             HashMap<String, String> map = new HashMap<String, String>();
             map.put(KEY_SUMMARY, e.getSummary());
             map.put(KEY_START, "Start: " + startHour);
             map.put(KEY_END, "End:  " + endHour);
             map.put(KEY_DATE,fin);//word
             map.put(KEY_DAY,last);//number
+            map.put(KEY_YEAR,year);
+            map.put(KEY_MONTH,month);
             //map.put(KEY_COLOR,color);//number
             datalist.add(map);
 
