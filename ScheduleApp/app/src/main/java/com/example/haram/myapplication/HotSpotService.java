@@ -71,7 +71,7 @@ public class HotSpotService extends Service {
     }
 
     private void getData(){
-        RequestTask makeRequestTask = new RequestTask(credential);
+        RequestTask makeRequestTask = new RequestTask(credential, getApplicationContext());
         makeRequestTask.setListener(new RequestTask.RequestTaskListener() {
             @Override
             public void onPreExecuteConcluded() {

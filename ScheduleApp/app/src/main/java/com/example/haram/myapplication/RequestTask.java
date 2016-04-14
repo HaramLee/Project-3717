@@ -1,6 +1,8 @@
 package com.example.haram.myapplication;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -22,9 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
+    private final String PREF_CAL_ID = "calendarId";
+    private String calendarId;
     private com.google.api.services.calendar.Calendar mService = null;
     private Exception mLastError = null;
-
+    private SharedPreferences sharedpreferences;
     public interface RequestTaskListener {
         void onPreExecuteConcluded();
         void onPostExecuteConcluded(List<Event> result);
@@ -36,13 +40,16 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
         listener = rlistener;
     }
 
-    public RequestTask(GoogleAccountCredential credential) {
+    public RequestTask(GoogleAccountCredential credential, Context context) {
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         mService = new com.google.api.services.calendar.Calendar.Builder(
                 transport, jsonFactory, credential)
                 .setApplicationName("Google Calendar API Android Quickstart")
                 .build();
+//        sharedpreferences = getSharedPreferences(PREF_CAL_ID, Context.MODE_PRIVATE);
+        sharedpreferences = context.getSharedPreferences(PREF_CAL_ID, context.MODE_PRIVATE);
+        calendarId = sharedpreferences.getString(PREF_CAL_ID,"fds");
     }
 
     /**
@@ -78,7 +85,8 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
 //        }
 
 
-        Events events = mService.events().list("4t6ltif9dt1tl65c7uj825miek@group.calendar.google.com")
+//        Events events = mService.events().list("7ggoeibosk29lbr80eoocch7h8@group.calendar.google.com")
+        Events events = mService.events().list(calendarId)
                 .execute();
         List<Event> items = events.getItems();
 
@@ -95,7 +103,6 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
 
     @Override
     protected void onPostExecute(List<Event> output) {
-        Log.d("****", output.toString());
         if (listener != null)
             listener.onPostExecuteConcluded(output);
     }
