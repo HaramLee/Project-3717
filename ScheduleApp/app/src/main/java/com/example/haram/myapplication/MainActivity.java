@@ -31,7 +31,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -323,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
         ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
 
-        String init,fin,last;
+        String init,fin,last,startHour,endHour;
         Date dates = null;
 
         for (Event e : output) {
@@ -333,6 +332,21 @@ public class MainActivity extends AppCompatActivity {
 
             DateTime startTime = (e.getStart()).getDateTime();
             DateTime endTime = (e.getEnd()).getDateTime();
+            Log.d("*****e.getStart*", e.getStart().toString());
+//            Log.d("*****e.getStart*", e.getStart().get("date").toString());
+//            Log.d("*****e.getStart*", e.getStart().get("dateTime").toString());
+            if (e.getStart().containsKey("date")) {
+                Log.d("********", "date exists");
+                startTime = (DateTime) e.getStart().get("date");
+                endTime = (DateTime) e.getEnd().get("date");
+                Log.d("***********", startTime.toString());
+            }
+            if (e.getStart().containsKey("dateTime")) {
+                Log.d("********", "dateTime exists");
+                startTime = (DateTime) e.getStart().get("dateTime");
+                endTime = (DateTime) e.getEnd().get("dateTime");
+                Log.d("***********", endTime.toString());
+            }
 
             //String color = e.getColorId();
             String Ymd = startTime.toString();
@@ -349,13 +363,13 @@ public class MainActivity extends AppCompatActivity {
             fin = init.substring(0, 4);
             last = init.substring(8,11);
 
-            String hour = Ymd.substring(11,16);
-            String hour2 = initTime.substring(11,16);
+            startHour = Ymd.substring(11,16);
+            endHour = initTime.substring(11,16);
 
             HashMap<String, String> map = new HashMap<String, String>();
             map.put(KEY_SUMMARY, e.getSummary());
-            map.put(KEY_START, "Start: " + hour);
-            map.put(KEY_END, "End: " + hour2);
+            map.put(KEY_START, "Start: " + startHour);
+            map.put(KEY_END, "End: " + endHour);
             map.put(KEY_DATE,fin);//word
             map.put(KEY_DAY,last);//number
             //map.put(KEY_COLOR,color);//number
