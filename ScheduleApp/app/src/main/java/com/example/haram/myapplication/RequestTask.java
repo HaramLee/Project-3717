@@ -70,12 +70,12 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
 
         CalendarList cal = mService.calendarList().list().execute();
 
-        for (CalendarListEntry entry : cal.getItems()){
-            Log.d("***", entry.getSummary());
-            if (entry.getSummary().equals("Home Games")){
-                Log.d("*****", entry.getId());
-            }
-        }
+//        for (CalendarListEntry entry : cal.getItems()){
+//            Log.d("***", entry.getSummary());
+//            if (entry.getSummary().equals("Home Games")){
+//                Log.d("*****", entry.getId());
+//            }
+//        }
 
 
         Events events = mService.events().list("4t6ltif9dt1tl65c7uj825miek@group.calendar.google.com")
@@ -95,6 +95,7 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
 
     @Override
     protected void onPostExecute(List<Event> output) {
+        Log.d("****", output.toString());
         if (listener != null)
             listener.onPostExecuteConcluded(output);
     }

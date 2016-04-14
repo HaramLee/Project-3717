@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         t.replace(R.id.calendar1, caldroidFragment);
         t.commit();
 
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+
 
         final ArrayList<String> calendars = new ArrayList<String>();
         RequestCalendarList calen = new RequestCalendarList(mCredential);
@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
         calen.execute();
 
 
+        Spinner spinner = (Spinner) findViewById(R.id.spinner);
 
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, calendars);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
