@@ -143,8 +143,6 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                        Log.d("***********", calendarList.get(pos).getId());
-
                         editor = sharedpreferences.edit();
                         editor.putString(PREF_CAL_ID, calendarList.get(pos).getId());
 //                        editor.putInt(PREF_CAL_ID_POS, pos);
@@ -164,11 +162,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         requestCalendarList.execute();
-
-
-
-
-
     }
 
     /**
@@ -333,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
 
         summary = new ArrayList<String>();
         ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
-        ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
+//        ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
         ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
 
         String init="",fin="",last="",startHour="",endHour="",month="",year="";
@@ -341,24 +334,14 @@ public class MainActivity extends AppCompatActivity {
         DateTime startTime = null, endTime = null;
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         for (Event e : output) {
-            summary.add(e.getSummary());
-            start.add(e.getStart());
-            end.add(e.getEnd());
 
-
-//            DateTime startTime = (e.getStart()).getDateTime();
-//            DateTime endTime = (e.getEnd()).getDateTime();
-            Log.d("*****e.getStart*", e.getStart().toString());
-//            Log.d("*****e.getStart*", e.getStart().get("date").toString());
-//            Log.d("*****e.getStart*", e.getStart().get("dateTime").toString());
-
-
-            if (e.getStart().containsKey("date")) {
-//                Log.d("********", "date exists");
+            if (e.getStatus().equals("cancelled")){
+                continue;
+            } else if (e.getStart().containsKey("date")) {
+                start.add(e.getStart());
+                summary.add(e.getSummary());
                 startTime = (DateTime) e.getStart().get("date");
                 endTime = (DateTime) e.getEnd().get("date");
-
-                Log.d("***********", startTime.toString());
 
                 //String color = e.getColorId();
                 String Ymd = startTime.toString();
@@ -377,10 +360,9 @@ public class MainActivity extends AppCompatActivity {
                 startHour = "00:00";
                 endHour = "23:59";
 
-            }
-
-            if (e.getStart().containsKey("dateTime")) {
-//                Log.d("********", "dateTime exists");
+            } else if (e.getStart().containsKey("dateTime")) {
+                start.add(e.getStart());
+                summary.add(e.getSummary());
                 startTime = (DateTime) e.getStart().get("dateTime");
                 endTime = (DateTime) e.getEnd().get("dateTime");
 
@@ -428,32 +410,11 @@ public class MainActivity extends AppCompatActivity {
         ListAdapter adapter = new ListAdapter(this, datalist);
         listview.setAdapter(adapter);
 
-        displayOutput(summary, start, end);
         setCustomResourceForDates(start);
 
     }
 
-    private void displayOutput(ArrayList<String> summary, ArrayList<EventDateTime> start, ArrayList<EventDateTime> end) {
-        int numEvents = summary.size();
-        String outputText = "";
-        for (int i = 0; i < numEvents; i++){
-          if (start.get(i).getDateTime() != null) {
-              DateTime startTime = start.get(i).getDateTime();
-              DateTime endTime = end.get(i).getDateTime();
 
-              outputText += summary.get(i) + " \n"
-                      + "Starting at: " + startTime.toString() + " \n"
-                      + "Ending at: " + endTime.toString() + " \n"
-                      + "\n";
-          } else {
-              DateTime startDate = start.get(i).getDate();
-              outputText += summary.get(i) + " \n"
-                      + "Starting at: " + startDate.toString() + " \n";
-          }
-        }
-
-//        mOutputText.setText(outputText);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -521,7 +482,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            
+
             if (caldroidFragment != null) {
                 ColorDrawable cell = new ColorDrawable(getResources().getColor(R.color.blue));
                 caldroidFragment.setBackgroundDrawableForDate(cell, inputDate);
