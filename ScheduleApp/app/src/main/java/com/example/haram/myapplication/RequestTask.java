@@ -49,7 +49,7 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
                 .build();
 //        sharedpreferences = getSharedPreferences(PREF_CAL_ID, Context.MODE_PRIVATE);
         sharedpreferences = context.getSharedPreferences(PREF_CAL_ID, context.MODE_PRIVATE);
-        calendarId = sharedpreferences.getString(PREF_CAL_ID,"fds");
+        calendarId = sharedpreferences.getString(PREF_CAL_ID, credential.getSelectedAccount().name);
     }
 
     /**
@@ -84,7 +84,7 @@ public class RequestTask extends AsyncTask<Void, Void, List<Event>> {
 //            }
 //        }
 
-
+        Log.d("***calendarID", calendarId);
 //        Events events = mService.events().list("7ggoeibosk29lbr80eoocch7h8@group.calendar.google.com")
         Events events = mService.events().list(calendarId)
                 .execute();

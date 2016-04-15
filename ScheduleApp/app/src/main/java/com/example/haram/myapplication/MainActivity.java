@@ -1,43 +1,58 @@
 package com.example.haram.myapplication;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+
+import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.client.util.DateTime;
+
+import com.google.api.services.calendar.model.*;
+
 import android.Manifest;
 import android.accounts.AccountManager;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.util.DateTime;
-import com.google.api.client.util.ExponentialBackOff;
-import com.google.api.services.calendar.CalendarScopes;
-import com.google.api.services.calendar.model.CalendarListEntry;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
-
-
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -60,10 +75,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
 //    ProgressDialog mProgress;
 
-    static final int REQUEST_ACCOUNT_PICKER = 1000;
-    static final int REQUEST_AUTHORIZATION = 1001;
-    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
-    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+    static final int REQUEST_ACCOUNT_PICKER = 100;
+    static final int REQUEST_AUTHORIZATION = 101;
+    static final int REQUEST_GOOGLE_PLAY_SERVICES = 102;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 103;
 
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
@@ -157,23 +172,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             }
         });
         requestCalendarList.execute();
-
     }
 
-    /**
-     * Called whenever this activity is pushed to the foreground, such as after
-     * a call to onCreate().
-     */
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        if (isGooglePlayServicesAvailable()) {
-//            refreshResults();
-//        } else {
-////            mOutputText.setText("Google Play Services required: " +
-////                    "after installing, close and relaunch this app.");
-//        }
-//    }
 
     /**
      * Called when an activity launched here (specifically, AccountPicker
@@ -192,7 +192,23 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         switch(requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
-                    Log.d("**********", "results not ok");
+                    Dialog dialog = new AlertDialog.Builder(this)
+                            .setTitle("This app requires Google Play Services. Please install " +
+                                    " Google Play Services on your device and relaunch this app.")
+                            .setMessage("You must be online for this app to work.")
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //do nothing
+                                }
+                            })
+                            .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //do nothing
+                                }
+                            })
+                            .show();
                 } else {
                     getData();
                 }
@@ -246,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
      */
     @Override
     public void onPermissionsGranted(int requestCode, List<String> list) {
-        // Do nothing.
+        //Do nothing
     }
 
     /**
@@ -269,7 +285,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private void refreshResults() {
         if (mCredential.getSelectedAccountName() == null) {
             chooseAccount();
-            Log.d("******", "in6");
         } else {
             if (isDeviceOnline()) {
                 getData();
@@ -285,9 +300,23 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         } else if (mCredential.getSelectedAccountName() == null) {
             chooseAccount();
         } else if (!isDeviceOnline()) {
-            Log.d("***", "Must be online!");
+            Dialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("Device Offline")
+                    .setMessage("You must be online for this app to work.")
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //do nothing
+                        }
+                    })
+                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //do nothing
+                        }
+                    })
+                    .show();
         } else {
-
             RequestTask makeRequestTask = new RequestTask(mCredential, getApplicationContext());
             makeRequestTask.setListener(new RequestTask.RequestTaskListener() {
                 @Override
@@ -351,22 +380,16 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     /**
-     * Check that Google Play services APK is installed and up to date. Will
-     * launch an error dialog for the user to update Google Play Services if
-     * possible.
+     * Check that Google Play services APK is installed and up to date.
      * @return true if Google Play Services is available and up to
      *     date on this device; false otherwise.
      */
     private boolean isGooglePlayServicesAvailable() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
         final int connectionStatusCode =
-                GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
-            showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
-            return false;
-        } else if (connectionStatusCode != ConnectionResult.SUCCESS ) {
-            return false;
-        }
-        return true;
+                apiAvailability.isGooglePlayServicesAvailable(this);
+        return connectionStatusCode == ConnectionResult.SUCCESS;
     }
 
     /**
@@ -391,13 +414,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
      */
     void showGooglePlayServicesAvailabilityErrorDialog(
             final int connectionStatusCode) {
-        Dialog dialog = GooglePlayServicesUtil.getErrorDialog(
-                connectionStatusCode,
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        Dialog dialog = apiAvailability.getErrorDialog(
                 MainActivity.this,
+                connectionStatusCode,
                 REQUEST_GOOGLE_PLAY_SERVICES);
-//        dialog.show();
-
+        dialog.show();
     }
+
+
     static final String KEY_DATE = "date";
     static final String KEY_DAY = "day";
     static final String KEY_START = "start";
