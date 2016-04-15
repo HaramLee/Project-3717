@@ -23,6 +23,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.ListView;
@@ -80,7 +83,13 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
+    private final String PREF_CAL_ID = "calendarId";
+    private final String PREF_CAL_ID_POS = "calendarIdPos";
     public static  ArrayList<String> summary;
+    private ArrayList<Date> currentlyDisplayedDates = new ArrayList<Date>();
+
+    private SharedPreferences sharedpreferences;
+    private SharedPreferences.Editor editor;
 
     private CaldroidFragment caldroidFragment;
 
@@ -101,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
 //        viewpager.setAdapter(ft);
 
         mOutputText = (TextView) findViewById(R.id.glance);
+        sharedpreferences = getSharedPreferences(PREF_CAL_ID, Context.MODE_PRIVATE);
 
         // Initialize credentials and service object.
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
@@ -128,8 +138,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         final ArrayList<String> calendars = new ArrayList<String>();
-        RequestCalendarList calen = new RequestCalendarList(mCredential);
-        calen.setListener(new RequestCalendarList.RequestCalendarListListener() {
+        
+        RequestCalendarList requestCalendarList = new RequestCalendarList(mCredential);
+        requestCalendarList.setListener(new RequestCalendarList.RequestCalendarListListener() {
             @Override
             public void onPreExecuteConcluded() {
 
@@ -140,19 +151,42 @@ public class MainActivity extends AppCompatActivity {
                 for (CalendarListEntry entry : result) {
                     calendars.add(entry.getSummary());
                 }
+                final List<CalendarListEntry> calendarList = result;
+                Spinner spinner = (Spinner) findViewById(R.id.spinner);
+
+                ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(MainActivity.this,
+                        android.R.layout.simple_spinner_item, calendars);
+                spinnerArrayAdapter.setDropDownViewResource(android.R.layout.
+                        simple_spinner_dropdown_item);
+                spinner.setAdapter(spinnerArrayAdapter);
+
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                        Log.d("***********", calendarList.get(pos).getId());
+
+                        editor = sharedpreferences.edit();
+                        editor.putString(PREF_CAL_ID, calendarList.get(pos).getId());
+//                        editor.putInt(PREF_CAL_ID_POS, pos);
+                        editor.commit();
+                        getData();
+
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> arg0) {
+                        // TODO Auto-generated method stub
+
+                    }
+
+                });
+
             }
         });
-        calen.execute();
+        requestCalendarList.execute();
 
 
-
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
-
-
-
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, calendars);
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(spinnerArrayAdapter);
 
 
 
@@ -239,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getData() {
-        RequestTask makeRequestTask = new RequestTask(mCredential);
+        RequestTask makeRequestTask = new RequestTask(mCredential, getApplicationContext());
         makeRequestTask.setListener(new RequestTask.RequestTaskListener() {
             @Override
             public void onPreExecuteConcluded() {
@@ -330,22 +364,23 @@ public class MainActivity extends AppCompatActivity {
             start.add(e.getStart());
             end.add(e.getEnd());
 
-            DateTime startTime = (e.getStart()).getDateTime();
-            DateTime endTime = (e.getEnd()).getDateTime();
-            Log.d("*****e.getStart*", e.getStart().toString());
+            DateTime startTime = null;
+            DateTime endTime = null;
+//            Log.d("*****e.getStart*", e.getStart().toString());
 //            Log.d("*****e.getStart*", e.getStart().get("date").toString());
 //            Log.d("*****e.getStart*", e.getStart().get("dateTime").toString());
+            Log.d("*********e", e.toString());
             if (e.getStart().containsKey("date")) {
-                Log.d("********", "date exists");
+//                Log.d("********", "date exists");
                 startTime = (DateTime) e.getStart().get("date");
                 endTime = (DateTime) e.getEnd().get("date");
-                Log.d("***********", startTime.toString());
+//                Log.d("***********", startTime.toString());
             }
             if (e.getStart().containsKey("dateTime")) {
-                Log.d("********", "dateTime exists");
+//                Log.d("********", "dateTime exists");
                 startTime = (DateTime) e.getStart().get("dateTime");
                 endTime = (DateTime) e.getEnd().get("dateTime");
-                Log.d("***********", endTime.toString());
+//                Log.d("***********", endTime.toString());
             }
 
             //String color = e.getColorId();
@@ -363,17 +398,17 @@ public class MainActivity extends AppCompatActivity {
             fin = init.substring(0, 4);
             last = init.substring(8,11);
 
-            startHour = Ymd.substring(11,16);
-            endHour = initTime.substring(11,16);
-
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put(KEY_SUMMARY, e.getSummary());
-            map.put(KEY_START, "Start: " + startHour);
-            map.put(KEY_END, "End: " + endHour);
-            map.put(KEY_DATE,fin);//word
-            map.put(KEY_DAY,last);//number
-            //map.put(KEY_COLOR,color);//number
-            datalist.add(map);
+//            startHour = Ymd.substring(11,16);
+//            endHour = initTime.substring(11,16);
+//
+//            HashMap<String, String> map = new HashMap<String, String>();
+//            map.put(KEY_SUMMARY, e.getSummary());
+//            map.put(KEY_START, "Start: " + startHour);
+//            map.put(KEY_END, "End: " + endHour);
+//            map.put(KEY_DATE,fin);//word
+//            map.put(KEY_DAY,last);//number
+//            //map.put(KEY_COLOR,color);//number
+//            datalist.add(map);
 
         }
         ListView listview = (ListView) findViewById(R.id.list);
@@ -440,7 +475,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.refresh_id:
                 getData();
-                caldroidFragment.refreshView();
                 break;
             default:
                 break;
@@ -450,8 +484,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void setCustomResourceForDates(ArrayList<EventDateTime> events) {
-        Calendar cal = Calendar.getInstance();
 
+        //reset background to white, text to black
+        ColorDrawable whiteCell = new ColorDrawable(getResources().getColor(R.color.white));
+        for(Date date : currentlyDisplayedDates){
+            caldroidFragment.setBackgroundDrawableForDate(whiteCell, date);
+            caldroidFragment.setTextColorForDate(R.color.caldroid_black, date);
+        }
+
+        currentlyDisplayedDates.clear();
         for (EventDateTime date : events){
 //            int event = Integer.parseInt(result.substring(date + 3, date + 5));
             Date inputDate = null;
@@ -464,6 +505,7 @@ public class MainActivity extends AppCompatActivity {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
                 inputDate = dateFormat.parse(Ymd);
+                currentlyDisplayedDates.add(inputDate);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
