@@ -7,38 +7,44 @@
         android:layout_height="wrap_content"
         android:id="@+id/date"
         android:textSize="15dip"
+        android:paddingLeft="15dip"
         android:textStyle="bold"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/day"
         android:textSize="10dip"
+        android:paddingLeft="15dip"
         android:layout_below="@+id/date"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/start"
-        android:layout_toRightOf="@+id/date"
-        android:textSize="10dip"/>
+        android:paddingLeft="80dip"
+        android:textSize="10dip"
+        />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/end"
         android:layout_below="@+id/start"
-        android:layout_toRightOf="@+id/date"
+        android:paddingLeft="80dip"
+
         android:textSize="10dip"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/summary"
-        android:layout_toRightOf="@+id/start"
+        android:paddingLeft="180dip"
+
         android:textSize="15dip"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/color"
-        android:layout_toRightOf="@+id/summary"
+        android:paddingLeft="180dip"
+
         android:textSize="15dip"/>
 
 </RelativeLayout>

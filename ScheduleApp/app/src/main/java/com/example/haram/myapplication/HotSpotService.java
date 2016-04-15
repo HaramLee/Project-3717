@@ -27,11 +27,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 //import com.imanoweb.calendarview.CustomCalendarView;
@@ -80,7 +86,7 @@ public class HotSpotService extends Service {
         makeRequestTask.execute();
     }
 
-    private void createHotSpot(){
+    private void createHotSpot(ArrayList<HashMap<String, String>> datalist){
         DisplayMetrics displayMetrics = new DisplayMetrics();
         windowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
         windowManager2 = (WindowManager)getSystemService(WINDOW_SERVICE);
@@ -101,7 +107,7 @@ public class HotSpotService extends Service {
         textView.setBackgroundResource(R.color.red);
 
         newList = new ListView(this);
-        setSummary();
+        setSummary(datalist);
 
         final WindowManager.LayoutParams layoutParams3 = new WindowManager.LayoutParams();
         layoutParams3.height = WindowManager.LayoutParams.MATCH_PARENT;
@@ -144,16 +150,20 @@ public class HotSpotService extends Service {
 
     }
 
-    private void setSummary(){
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, summary){
+    private void setSummary(ArrayList<HashMap<String, String>> datalist){
+
+        //ListAdapter adapter = new ListAdapter(this, datalist);
+        //listview.setAdapter(adapter);
+
+        final ListAdapterHot adapter = new ListAdapterHot(this, datalist){
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view =super.getView(position, convertView, parent);
 
-                TextView textView=(TextView) view.findViewById(android.R.id.text1);
+               // TextView textView=(TextView) view.findViewById(android.R.id.text1);
 
-                textView.setTextColor(Color.BLACK);
+               // textView.setTextColor(Color.BLACK);
 
                 return view;
             }
@@ -188,21 +198,63 @@ public class HotSpotService extends Service {
         return START_STICKY;
     }
 
+    static final String KEY_DATE = "date";
+    static final String KEY_DAY = "day";
+    static final String KEY_START = "start";
+    static final String KEY_END = "end";
+    static final String KEY_SUMMARY = "summary";
+    static final String KEY_COLOR = "color";
 
     private void parseOutput(List<Event> output) {
         summary = new ArrayList<String>();
         ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
         ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
+        ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
+
+        String init,fin,last;
+        Date dates = null;
 
         for (Event e : output) {
             summary.add(e.getSummary());
             start.add(e.getStart());
             end.add(e.getEnd());
+
+            DateTime startTime = (e.getStart()).getDateTime();
+            DateTime endTime = (e.getEnd()).getDateTime();
+
+            //String color = e.getColorId();
+            String Ymd = startTime.toString();
+            String initTime = endTime.toString();
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                dates = dateFormat.parse(Ymd);
+            } catch (ParseException j) {
+                j.printStackTrace();
+            }
+
+            init = dates.toString();
+            fin = init.substring(0, 4);
+            last = init.substring(8,11);
+
+            String hour = Ymd.substring(11,16);
+            String hour2 = initTime.substring(11,16);
+
+            HashMap<String, String> map = new HashMap<String, String>();
+            map.put(KEY_SUMMARY, e.getSummary());
+            map.put(KEY_START, "Start: " + hour);
+            map.put(KEY_END, "End: " + hour2);
+            map.put(KEY_DATE,fin);//word
+            map.put(KEY_DAY,last);//number
+            //map.put(KEY_COLOR,color);//number
+            datalist.add(map);
+
         }
+
         if (!inHotSpot) {
-            createHotSpot();
+            createHotSpot(datalist);
         } else {
-            setSummary();
+            setSummary(datalist);
         }
 
     }
