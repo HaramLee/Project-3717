@@ -1,17 +1,26 @@
 package com.example.haram.myapplication;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CalendarView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,24 +29,30 @@ import android.widget.Toast;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class HotSpotService extends Service {
+//import com.imanoweb.calendarview.CustomCalendarView;
+//import com.example.haram.myapplication.EdgeDetector;
 
-    RelativeLayout hotspotContainer;
-    RelativeLayout listViewContainer;
-    WindowManager hotspotWindowManager;
-    WindowManager listViewWindowManager;
+public class HotSpotService extends Service {
+//    EdgeDetector edgeDetector;
+    RelativeLayout rl;
+    RelativeLayout rl2;
+    WindowManager windowManager;
+    WindowManager windowManager2;
     static int height;
     static int width;
     static TextView textView;
+    static ListView taskList;
     static ListView newList;
     private static ArrayList<String> summary;
     private IntentFilter receiveFilter;
@@ -45,7 +60,6 @@ public class HotSpotService extends Service {
     private boolean inHotSpot = false;
 
     GoogleAccountCredential credential = MainActivity.mCredential;
-
     public IBinder onBind(Intent intent) {
         return null;
     }
@@ -74,14 +88,14 @@ public class HotSpotService extends Service {
 
     private void createHotSpot(ArrayList<HashMap<String, String>> datalist){
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        hotspotWindowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
-        listViewWindowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
-        hotspotWindowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        windowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
+        windowManager2 = (WindowManager)getSystemService(WINDOW_SERVICE);
+        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
 
         height = displayMetrics.heightPixels;
         width = displayMetrics.widthPixels;
-        hotspotContainer = new RelativeLayout(this);
-        listViewContainer = new RelativeLayout(this);
+        rl = new RelativeLayout(this);
+        rl2 = new RelativeLayout(this);
 
         //hotspot
         textView = new TextView(this);
@@ -112,13 +126,13 @@ public class HotSpotService extends Service {
                         inHotSpot = true;
                         getData();
                         textView.setBackgroundResource(R.color.white);
-                        listViewWindowManager.addView(listViewContainer, layoutParams3);
+                        windowManager2.addView(rl2, layoutParams3);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         inHotSpot = false;
                         textView.setBackgroundResource(R.color.red);
-                        listViewWindowManager.removeView(listViewContainer);
+                        windowManager2.removeView(rl2);
                         break;
 
                 }
@@ -127,7 +141,7 @@ public class HotSpotService extends Service {
         });
 
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        hotspotContainer.addView(textView, layoutParams);
+        rl.addView(textView, layoutParams);
         WindowManager.LayoutParams layoutParams2 = new WindowManager.LayoutParams();
         layoutParams2.height = WindowManager.LayoutParams.WRAP_CONTENT;
         layoutParams2.width = WindowManager.LayoutParams.WRAP_CONTENT;;
@@ -137,35 +151,32 @@ public class HotSpotService extends Service {
                                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         layoutParams2.format = PixelFormat.TRANSPARENT;
         layoutParams2.gravity = Gravity.RIGHT;
-        hotspotWindowManager.addView(hotspotContainer, layoutParams2);
+        windowManager.addView(rl, layoutParams2);
 
     }
 
     private void setSummary(ArrayList<HashMap<String, String>> datalist){
-
+        
         final ListAdapterHot adapter = new ListAdapterHot(this, datalist){
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
+                View view =super.getView(position, convertView, parent);
 
 
                 return view;
             }
         };
         newList.setBackgroundColor(getResources().getColor(R.color.white));
-
         newList.setAdapter(adapter);
-
-
 
         RelativeLayout.LayoutParams layoutParams_text =
                 new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         if (!inHotSpot) {
-            listViewContainer.addView(newList, layoutParams_text);
+            rl2.addView(newList, layoutParams_text);
         } else {
-            listViewContainer.removeView(newList);
-            listViewContainer.addView(newList, layoutParams_text);
+            rl2.removeView(newList);
+            rl2.addView(newList, layoutParams_text);
         }
     }
 
@@ -173,10 +184,10 @@ public class HotSpotService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
-        if(hotspotContainer != null)
+        if(rl != null)
         {
-            ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(hotspotContainer);
-            hotspotContainer = null;
+            ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(rl);
+            rl = null;
         }
     }
 
@@ -190,30 +201,27 @@ public class HotSpotService extends Service {
     static final String KEY_START = "start";
     static final String KEY_END = "end";
     static final String KEY_SUMMARY = "summary";
-    static final String KEY_COLOR = "color";
+    static final String KEY_MONTH = "month";
+    static final String KEY_YEAR = "year";
 
     private void parseOutput(List<Event> output) {
         summary = new ArrayList<String>();
+        ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
         ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
 
-        String init="",fin="",last="",startHour="",endHour="";
+        String init="",fin="",last="",startHour="",endHour="",month="",year="";
         Date dates = null;
         DateTime startTime = null, endTime = null;
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         for (Event e : output) {
-            summary.add(e.getSummary());
 
             if (e.getStatus().equals("cancelled")){
                 continue;
             } else if (e.getStart().containsKey("date")) {
-
+                start.add(e.getStart());
+                summary.add(e.getSummary());
                 startTime = (DateTime) e.getStart().get("date");
-                endTime = (DateTime) e.getEnd().get("date");
-
-
-                //String color = e.getColorId();
                 String Ymd = startTime.toString();
-                String initTime = endTime.toString();
 
                 try {
                     dates = dateFormat.parse(Ymd);
@@ -227,11 +235,13 @@ public class HotSpotService extends Service {
 
                 startHour = "00:00";
                 endHour = "23:59";
+
             } else if (e.getStart().containsKey("dateTime")) {
+                start.add(e.getStart());
+                summary.add(e.getSummary());
                 startTime = (DateTime) e.getStart().get("dateTime");
                 endTime = (DateTime) e.getEnd().get("dateTime");
 
-                //String color = e.getColorId();
                 String Ymd = startTime.toString();
                 String initTime = endTime.toString();
 
@@ -250,6 +260,9 @@ public class HotSpotService extends Service {
 
             }
 
+            month = init.substring(4,8);
+            year = startTime.toString().substring(0,4);
+
 
             HashMap<String, String> map = new HashMap<String, String>();
             map.put(KEY_SUMMARY, e.getSummary());
@@ -257,8 +270,11 @@ public class HotSpotService extends Service {
             map.put(KEY_END, "End:  " + endHour);
             map.put(KEY_DATE,fin);//word
             map.put(KEY_DAY,last);//number
+            map.put(KEY_YEAR,year);
+            map.put(KEY_MONTH,month);
             //map.put(KEY_COLOR,color);//number
             datalist.add(map);
+
 
         }
 

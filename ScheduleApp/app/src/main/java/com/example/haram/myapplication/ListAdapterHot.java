@@ -46,7 +46,8 @@ public class ListAdapterHot extends BaseAdapter {
         TextView start = (TextView)vi.findViewById(R.id.start);
         TextView end = (TextView)vi.findViewById(R.id.end);
         TextView summary = (TextView)vi.findViewById(R.id.summary);
-        TextView color = (TextView)vi.findViewById(R.id.color);
+        TextView month = (TextView)vi.findViewById(R.id.month);
+        TextView year = (TextView)vi.findViewById(R.id.year);
 
         HashMap<String, String> cal = new HashMap<String, String>();
         cal = data.get(position);
@@ -56,7 +57,9 @@ public class ListAdapterHot extends BaseAdapter {
         start.setText(cal.get(MainActivity.KEY_START));
         end.setText(cal.get(MainActivity.KEY_END));
         summary.setText(cal.get(MainActivity.KEY_SUMMARY));
-        color.setText(cal.get(MainActivity.KEY_COLOR));
+        month.setText(cal.get(MainActivity.KEY_MONTH));
+        year.setText(cal.get(MainActivity.KEY_YEAR));
+
 
         return vi;
     }

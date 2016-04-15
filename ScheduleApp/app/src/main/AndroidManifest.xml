@@ -25,10 +25,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".setting_display"></activity>
-        <activity
-            android:name=".setting_displayTwo"
-            android:label="Get Name"
-            android:theme="@style/AppTheme" />
 
         <service android:name=".HotSpotService" />
 
