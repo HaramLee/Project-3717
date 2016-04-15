@@ -7,54 +7,34 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.os.Parcelable;
+import android.net.NetworkInfo;;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CalendarView;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.EventReminder;
-import com.google.api.services.calendar.model.Events;
 
-import java.io.IOException;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,9 +44,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.example.haram.myapplication.CaldroidCustomFragment;
 import com.roomorama.caldroid.CaldroidFragment;
 
 
@@ -75,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     ViewPager viewpager;
     FragmentPageAdapter ft;
     public static GoogleAccountCredential mCredential;
-    public static TextView mOutputText;
+
 //    ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
@@ -111,8 +89,6 @@ public class MainActivity extends AppCompatActivity {
 //        ft = new FragmentPageAdapter(getSupportFragmentManager());
 
 //        viewpager.setAdapter(ft);
-
-        mOutputText = (TextView) findViewById(R.id.glance);
         sharedpreferences = getSharedPreferences(PREF_CAL_ID, Context.MODE_PRIVATE);
 
         // Initialize credentials and service object.
@@ -205,8 +181,8 @@ public class MainActivity extends AppCompatActivity {
         if (isGooglePlayServicesAvailable()) {
             refreshResults();
         } else {
-            mOutputText.setText("Google Play Services required: " +
-                    "after installing, close and relaunch this app.");
+//            mOutputText.setText("Google Play Services required: " +
+//                    "after installing, close and relaunch this app.");
 
         }
     }
@@ -245,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                         editor.apply();
                     }
                 } else if (resultCode == RESULT_CANCELED) {
-                    mOutputText.setText("Account unspecified.");
+//                    mOutputText.setText("Account unspecified.");
                 }
                 break;
             case REQUEST_AUTHORIZATION:
@@ -270,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
             if (isDeviceOnline()) {
                 getData();
             } else {
-                mOutputText.setText("No network connection available.");
+//                mOutputText.setText("No network connection available.");
             }
         }
     }
@@ -368,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
             start.add(e.getStart());
             end.add(e.getEnd());
 
-<<<<<<< HEAD
+
 //            DateTime startTime = (e.getStart()).getDateTime();
 //            DateTime endTime = (e.getEnd()).getDateTime();
             Log.d("*****e.getStart*", e.getStart().toString());
@@ -376,19 +352,11 @@ public class MainActivity extends AppCompatActivity {
 //            Log.d("*****e.getStart*", e.getStart().get("dateTime").toString());
 
 
-=======
-            DateTime startTime = null;
-            DateTime endTime = null;
-//            Log.d("*****e.getStart*", e.getStart().toString());
-//            Log.d("*****e.getStart*", e.getStart().get("date").toString());
-//            Log.d("*****e.getStart*", e.getStart().get("dateTime").toString());
-            Log.d("*********e", e.toString());
->>>>>>> acaaf98878b6974133b639f2d85ee132b09640d1
             if (e.getStart().containsKey("date")) {
 //                Log.d("********", "date exists");
                 startTime = (DateTime) e.getStart().get("date");
                 endTime = (DateTime) e.getEnd().get("date");
-<<<<<<< HEAD
+
                 Log.d("***********", startTime.toString());
 
                 //String color = e.getColorId();
@@ -407,21 +375,14 @@ public class MainActivity extends AppCompatActivity {
 
                 startHour = "00:00";
                 endHour = "23:59";
-=======
-//                Log.d("***********", startTime.toString());
->>>>>>> acaaf98878b6974133b639f2d85ee132b09640d1
+
             }
 
             if (e.getStart().containsKey("dateTime")) {
 //                Log.d("********", "dateTime exists");
                 startTime = (DateTime) e.getStart().get("dateTime");
                 endTime = (DateTime) e.getEnd().get("dateTime");
-<<<<<<< HEAD
-                Log.d("***********", endTime.toString());
-=======
-//                Log.d("***********", endTime.toString());
-            }
->>>>>>> acaaf98878b6974133b639f2d85ee132b09640d1
+
 
                 //String color = e.getColorId();
                 String Ymd = startTime.toString();
@@ -442,8 +403,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-<<<<<<< HEAD
-
             HashMap<String, String> map = new HashMap<String, String>();
             map.put(KEY_SUMMARY, e.getSummary());
             map.put(KEY_START, "Start: " + startHour);
@@ -452,19 +411,7 @@ public class MainActivity extends AppCompatActivity {
             map.put(KEY_DAY,last);//number
             //map.put(KEY_COLOR,color);//number
             datalist.add(map);
-=======
-//            startHour = Ymd.substring(11,16);
-//            endHour = initTime.substring(11,16);
-//
-//            HashMap<String, String> map = new HashMap<String, String>();
-//            map.put(KEY_SUMMARY, e.getSummary());
-//            map.put(KEY_START, "Start: " + startHour);
-//            map.put(KEY_END, "End: " + endHour);
-//            map.put(KEY_DATE,fin);//word
-//            map.put(KEY_DAY,last);//number
-//            //map.put(KEY_COLOR,color);//number
-//            datalist.add(map);
->>>>>>> acaaf98878b6974133b639f2d85ee132b09640d1
+
 
         }
         ListView listview = (ListView) findViewById(R.id.list);
@@ -496,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
           }
         }
 
-        mOutputText.setText(outputText);
+//        mOutputText.setText(outputText);
     }
 
     @Override
@@ -565,14 +512,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-
-
-
-
-//            cal.set(Calendar.DAY_OF_YEAR, date);
-//            cal.add(Calendar.DATE, 0);
-//            Date coloredDate = cal.getTime();
-//            blueDate = cal.getTime();
+            
             if (caldroidFragment != null) {
                 ColorDrawable cell = new ColorDrawable(getResources().getColor(R.color.blue));
                 caldroidFragment.setBackgroundDrawableForDate(cell, inputDate);
