@@ -10,40 +10,19 @@
     tools:context="com.example.haram.myapplication.MainActivity">
 
 
-        <!--<ListView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="0dp"-->
-            <!--android:layout_weight="1"-->
-            <!--android:layout_below="@id/glance"-->
-            <!--android:id="@+id/listView"-->
-            <!--android:entries="@array/studentID"-->
-            <!--/>-->
-			
-		<!--<android.support.v4.view.ViewPager-->
-        <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-        <!--android:id="@+id/pager"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!-->-->
-        <!--</android.support.v4.view.ViewPager>-->
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:id="@+id/linearLayout"
         xmlns:android="http://schemas.android.com/apk/res/android">
-        <!--<com.imanoweb.calendarview.CustomCalendarView-->
-            <!--android:id="@+id/calendar"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:background="#ffffff" />-->
 
         <LinearLayout
             android:id="@+id/calendar1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="300dp"
             android:orientation="vertical">
+
         </LinearLayout>
 
         <Spinner

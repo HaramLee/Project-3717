@@ -63,10 +63,10 @@ public class setting_display extends PreferenceActivity {
         Log.d("***********", currentValue);
         if(currentValue.equals("1")){
             layoutId = 1;
-            System.out.println(layoutId);
+            startService(new Intent(getBaseContext(), MainActivity.class));
         } else if (currentValue.equals("2")){
             layoutId = 2;
-            System.out.println(layoutId);
+            startService(new Intent(getBaseContext(), MainActivity.class));
         }
     }
 
