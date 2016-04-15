@@ -1,26 +1,17 @@
 package com.example.haram.myapplication;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CalendarView;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -29,30 +20,24 @@ import android.widget.Toast;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-//import com.imanoweb.calendarview.CustomCalendarView;
-//import com.example.haram.myapplication.EdgeDetector;
-
 public class HotSpotService extends Service {
-//    EdgeDetector edgeDetector;
-    RelativeLayout rl;
-    RelativeLayout rl2;
-    WindowManager windowManager;
-    WindowManager windowManager2;
+
+    RelativeLayout hotspotContainer;
+    RelativeLayout listViewContainer;
+    WindowManager hotspotWindowManager;
+    WindowManager listViewWindowManager;
     static int height;
     static int width;
     static TextView textView;
-    static ListView taskList;
     static ListView newList;
     private static ArrayList<String> summary;
     private IntentFilter receiveFilter;
@@ -60,6 +45,7 @@ public class HotSpotService extends Service {
     private boolean inHotSpot = false;
 
     GoogleAccountCredential credential = MainActivity.mCredential;
+
     public IBinder onBind(Intent intent) {
         return null;
     }
@@ -88,14 +74,14 @@ public class HotSpotService extends Service {
 
     private void createHotSpot(ArrayList<HashMap<String, String>> datalist){
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        windowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
-        windowManager2 = (WindowManager)getSystemService(WINDOW_SERVICE);
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        hotspotWindowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
+        listViewWindowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
+        hotspotWindowManager.getDefaultDisplay().getMetrics(displayMetrics);
 
         height = displayMetrics.heightPixels;
         width = displayMetrics.widthPixels;
-        rl = new RelativeLayout(this);
-        rl2 = new RelativeLayout(this);
+        hotspotContainer = new RelativeLayout(this);
+        listViewContainer = new RelativeLayout(this);
 
         //hotspot
         textView = new TextView(this);
@@ -126,13 +112,13 @@ public class HotSpotService extends Service {
                         inHotSpot = true;
                         getData();
                         textView.setBackgroundResource(R.color.white);
-                        windowManager2.addView(rl2, layoutParams3);
+                        listViewWindowManager.addView(listViewContainer, layoutParams3);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         inHotSpot = false;
                         textView.setBackgroundResource(R.color.red);
-                        windowManager2.removeView(rl2);
+                        listViewWindowManager.removeView(listViewContainer);
                         break;
 
                 }
@@ -141,7 +127,7 @@ public class HotSpotService extends Service {
         });
 
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        rl.addView(textView, layoutParams);
+        hotspotContainer.addView(textView, layoutParams);
         WindowManager.LayoutParams layoutParams2 = new WindowManager.LayoutParams();
         layoutParams2.height = WindowManager.LayoutParams.WRAP_CONTENT;
         layoutParams2.width = WindowManager.LayoutParams.WRAP_CONTENT;;
@@ -151,19 +137,17 @@ public class HotSpotService extends Service {
                                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         layoutParams2.format = PixelFormat.TRANSPARENT;
         layoutParams2.gravity = Gravity.RIGHT;
-        windowManager.addView(rl, layoutParams2);
+        hotspotWindowManager.addView(hotspotContainer, layoutParams2);
 
     }
 
     private void setSummary(ArrayList<HashMap<String, String>> datalist){
 
-        //listview.setAdapter(adapter);
-
         final ListAdapterHot adapter = new ListAdapterHot(this, datalist){
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                View view =super.getView(position, convertView, parent);
+                View view = super.getView(position, convertView, parent);
 
 
                 return view;
@@ -172,16 +156,16 @@ public class HotSpotService extends Service {
         newList.setBackgroundColor(getResources().getColor(R.color.white));
 
         newList.setAdapter(adapter);
-        //newList.setBackgroundColor(getResources().getColor(R.color.white));
+
 
 
         RelativeLayout.LayoutParams layoutParams_text =
                 new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         if (!inHotSpot) {
-            rl2.addView(newList, layoutParams_text);
+            listViewContainer.addView(newList, layoutParams_text);
         } else {
-            rl2.removeView(newList);
-            rl2.addView(newList, layoutParams_text);
+            listViewContainer.removeView(newList);
+            listViewContainer.addView(newList, layoutParams_text);
         }
     }
 
@@ -189,10 +173,10 @@ public class HotSpotService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
-        if(rl != null)
+        if(hotspotContainer != null)
         {
-            ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(rl);
-            rl = null;
+            ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(hotspotContainer);
+            hotspotContainer = null;
         }
     }
 
@@ -210,8 +194,6 @@ public class HotSpotService extends Service {
 
     private void parseOutput(List<Event> output) {
         summary = new ArrayList<String>();
-        ArrayList<EventDateTime> start = new ArrayList<EventDateTime>();
-        ArrayList<EventDateTime> end = new ArrayList<EventDateTime>();
         ArrayList<HashMap<String, String>> datalist = new ArrayList<HashMap<String, String>>();
 
         String init="",fin="",last="",startHour="",endHour="";
@@ -220,21 +202,14 @@ public class HotSpotService extends Service {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         for (Event e : output) {
             summary.add(e.getSummary());
-            start.add(e.getStart());
-            end.add(e.getEnd());
 
-//            DateTime startTime = (e.getStart()).getDateTime();
-//            DateTime endTime = (e.getEnd()).getDateTime();
-            Log.d("*****e.getStart*", e.getStart().toString());
-//            Log.d("*****e.getStart*", e.getStart().get("date").toString());
-//            Log.d("*****e.getStart*", e.getStart().get("dateTime").toString());
+            if (e.getStatus().equals("cancelled")){
+                continue;
+            } else if (e.getStart().containsKey("date")) {
 
-
-            if (e.getStart().containsKey("date")) {
-                Log.d("********", "date exists");
                 startTime = (DateTime) e.getStart().get("date");
                 endTime = (DateTime) e.getEnd().get("date");
-                Log.d("***********", startTime.toString());
+
 
                 //String color = e.getColorId();
                 String Ymd = startTime.toString();
@@ -252,13 +227,9 @@ public class HotSpotService extends Service {
 
                 startHour = "00:00";
                 endHour = "23:59";
-            }
-
-            if (e.getStart().containsKey("dateTime")) {
-                Log.d("********", "dateTime exists");
+            } else if (e.getStart().containsKey("dateTime")) {
                 startTime = (DateTime) e.getStart().get("dateTime");
                 endTime = (DateTime) e.getEnd().get("dateTime");
-                Log.d("***********", endTime.toString());
 
                 //String color = e.getColorId();
                 String Ymd = startTime.toString();
