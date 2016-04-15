@@ -175,7 +175,7 @@ public class HotSpotService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
         if(rl != null)
         {
             ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(rl);

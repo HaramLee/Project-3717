@@ -67,14 +67,6 @@ public class RequestCalendarList extends AsyncTask<Void, Void, List<CalendarList
      */
     private List<CalendarListEntry> getDataFromApi() throws IOException {
         CalendarList cal = mService.calendarList().list().execute();
-
-//        for (CalendarListEntry entry : cal.getItems()){
-//            Log.d("***", entry.getSummary());
-//            if (entry.getSummary().equals("Home Games")){
-//                Log.d("*****", entry.getId());
-//            }
-//        }
-
         return cal.getItems();
     }
 
