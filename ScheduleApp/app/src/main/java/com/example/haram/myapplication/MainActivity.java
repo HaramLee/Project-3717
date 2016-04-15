@@ -32,7 +32,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.*;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -79,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     static final int REQUEST_AUTHORIZATION = 101;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 102;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 103;
+    static final int REQUEST_PERMISSION_SYSTEM_ALERT_WINDOW = 104;
 
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
@@ -172,6 +176,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             }
         });
         requestCalendarList.execute();
+        alert_window_permissions();
     }
 
 
@@ -289,7 +294,22 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             if (isDeviceOnline()) {
                 getData();
             } else {
-//                mOutputText.setText("No network connection available.");
+                Dialog dialog = new AlertDialog.Builder(this)
+                        .setTitle("Device Offline")
+                        .setMessage("You must be online for this app to work.")
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //do nothing
+                            }
+                        })
+                        .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //do nothing
+                            }
+                        })
+                        .show();
             }
         }
     }
@@ -300,22 +320,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         } else if (mCredential.getSelectedAccountName() == null) {
             chooseAccount();
         } else if (!isDeviceOnline()) {
-            Dialog dialog = new AlertDialog.Builder(this)
-                    .setTitle("Device Offline")
-                    .setMessage("You must be online for this app to work.")
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //do nothing
-                        }
-                    })
-                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //do nothing
-                        }
-                    })
-                    .show();
+            refreshResults();
         } else {
             RequestTask makeRequestTask = new RequestTask(mCredential, getApplicationContext());
             makeRequestTask.setListener(new RequestTask.RequestTaskListener() {
@@ -367,7 +372,34 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     Manifest.permission.GET_ACCOUNTS);
         }
     }
+    @AfterPermissionGranted(REQUEST_PERMISSION_SYSTEM_ALERT_WINDOW)
+    private void alert_window_permissions() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)){
+            Dialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("Hotspot Permission")
+                    .setMessage("In the next screen, please allow this app to draw over " +
+                            "other apps so that the hotspot feature can function correctly. If" +
+                            "this is cancelled, the app will crash when the hotspot is enabled.")
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //do nothing
+                        }
+                    })
+                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Show alert dialog to the user saying a separate permission is needed
+                            // Launch the settings activity if the user prefers
+                            Intent myIntent = new Intent(
+                                    android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                            startActivity(myIntent);
+                        }
+                    })
+                    .show();
+        }
 
+    }
     /**
      * Checks whether the device currently has a network connection.
      * @return true if the device has a network connection, false otherwise.
